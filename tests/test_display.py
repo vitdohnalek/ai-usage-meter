@@ -2,17 +2,18 @@ import unittest
 from datetime import timedelta
 
 from ai_usage_meter.core.display import SEPARATOR, MeterDisplay, make
-from ai_usage_meter.core.snapshot import ProviderUsage, Snapshot, UsageWindow
-from tests.fixtures import CAPTURED as NOW, FIVE_RESET, SEVEN_RESET
+from ai_usage_meter.core.snapshot import ModelWindow, ProviderUsage, Snapshot, UsageWindow
+from tests.fixtures import CAPTURED as NOW, FIVE_RESET, MODEL_RESET, SEVEN_RESET
 
 
-def snapshot(five, seven, captured_ago=120):
+def snapshot(five, seven, captured_ago=120, model=None, model_name="Fable"):
     return Snapshot(schema_version=1, providers={
         "claude": ProviderUsage(
             five_hour=UsageWindow(five, FIVE_RESET) if five is not None else None,
             seven_day=UsageWindow(seven, SEVEN_RESET) if seven is not None else None,
             captured_at=NOW - timedelta(seconds=captured_ago),
             source="statusline",
+            seven_day_model=ModelWindow(model, MODEL_RESET, model_name) if model is not None else None,
         )
     })
 
@@ -77,3 +78,20 @@ class DisplayStateTests(unittest.TestCase):
 
     def test_separator_is_the_single_source_of_truth(self):
         self.assertEqual(SEPARATOR, " · ")
+
+    def test_model_row_appears_only_once_known(self):
+        self.assertIsNone(make(snapshot(42, 18), NOW).model)
+        self.assertEqual(len(make(snapshot(42, 18), NOW).windows), 2)
+        display = make(snapshot(42, 18, model=5), NOW)
+        self.assertEqual(display.model.percent_text, "5%")
+        self.assertEqual(display.model.row_text, "Fable  5% · resets in 1d 07h")
+        self.assertEqual(len(display.windows), 3)
+        self.assertIs(display.windows[2], display.model)
+
+    def test_model_row_obeys_bold_and_flip(self):
+        self.assertTrue(make(snapshot(1, 1, model=75), NOW).model.is_bold)
+        self.assertFalse(make(snapshot(1, 1, model=75), NOW).is_flipped)
+        self.assertTrue(make(snapshot(1, 1, model=90), NOW).is_flipped)
+
+    def test_model_row_falls_back_to_a_generic_name(self):
+        self.assertEqual(make(snapshot(1, 1, model=5, model_name=""), NOW).model.row_text.split("  ")[0], "Model")

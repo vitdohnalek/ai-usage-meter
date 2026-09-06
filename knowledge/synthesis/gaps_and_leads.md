@@ -21,15 +21,20 @@
   `SnapshotStore.withExclusiveLock`. No trigger yet.
 - The Quit menu item's keyboard shortcut (`q`) has no visible affordance in
   the dropdown. No trigger yet.
-- The Fable per-model weekly window is not in the statusline payload on
-  Claude Code 2.1.261 (probe 2, [S3:F1][S3:F2]); the only source is the
-  usage API, which the data-source decision forbids. Trigger: a Claude Code
-  release that forwards `model_scoped` or `seven_day_overage_included` into
-  the statusline `rate_limits` block; then a third window is a small task.
+- Closed 2026-09-06: the Fable per-model weekly window is still not in the
+  statusline payload on 2.1.263 ([S4:F1]) but the tray now reads it through
+  the `get_usage` control request ([S4:F3],
+  [decision](../decisions/2026-09-06_fable-window-via-get-usage.md)).
+  Remaining lead: if a later Claude Code forwards it into the statusline
+  `rate_limits` block, drop the probe and let the hook write it.
+- The probe spawns `claude -p` every 5 minutes (1.3 s each). Trigger: if
+  Anthropic ever rate-limits `get_usage` or the SDK control channel changes
+  shape, the third number silently stops updating and its reset countdown
+  runs out to 0 percent; watch `source` in the snapshot.
 - A `resets_at` unit change upstream (seconds to milliseconds or ISO) would
   render a clamped huge countdown or drop the window silently. Trigger:
   Claude Code changes the unit; then reject values outside now-1d..now+60d.
 
 Related: [data-source decision](../decisions/2026-09-05_data-source-statusline-snapshot.md)
 
-**Last updated**: 2026-09-05
+**Last updated**: 2026-09-06

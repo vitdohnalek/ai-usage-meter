@@ -8,10 +8,11 @@
 
 A personal Linux tray meter for AI-subscription usage, forked from
 DanielZucha/ai-usage-meter (macOS), that never handles a credential. It
-renders Claude Code's 5-hour and 7-day rate-limit utilization on Ubuntu /
-GNOME; the hook alone runs anywhere with Python 3, including WSL. Done
-means: the glyph and two numbers sit in the tray, update after every Claude
-Code turn, count down to reset while idle, and launch at login.
+renders Claude Code's 5-hour, 7-day, and per-model weekly (Fable)
+rate-limit utilization on Ubuntu / GNOME; the hook alone runs anywhere with
+Python 3, including WSL. Done means: the glyph and three numbers sit in the
+tray, update after every Claude Code turn, count down to reset while idle,
+and launch at login.
 
 ## Ultimate-goal alignment
 
@@ -23,8 +24,9 @@ additive; the hook never blocks or writes stderr.
 ## Architecture (pointers)
 
 - Data path: Claude Code statusline hook -> snapshot JSON on disk -> tray
-  app. The hook is the only writer; the tray is read-only, polling every
-  30 s.
+  app, polling every 30 s. Second writer: every 5 min the tray asks a
+  throwaway `claude -p` for the `get_usage` control request and merges the
+  per-model window (`core/usage_probe.py`); both writers share the flock.
 - Package: `ai_usage_meter/core` holds every rule and is stdlib only;
   `hook.py` and `tray/app.py` are thin shells; `tray/label.py` holds the
   tray's pure label rules. Test with `make test` (unittest, no packages),
@@ -39,7 +41,9 @@ additive; the hook never blocks or writes stderr.
 ## Session rules
 
 - Never read Claude Code credentials from code or tests. Never call
-  `api/oauth/usage`. If a task seems to need either, stop and raise it.
+  `api/oauth/usage` yourself; the only sanctioned route to usage data is
+  Claude Code's own statusline JSON or its `get_usage` control request.
+  If a task seems to need more, stop and raise it.
 - Never write to `~/.claude/settings.json` from an installer; print the
   snippet and let the user apply it.
 - Fail quietly in the hook: it runs inside Claude Code's render loop and must

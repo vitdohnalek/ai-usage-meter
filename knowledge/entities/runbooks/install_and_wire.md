@@ -13,16 +13,25 @@
 4. Send one prompt in any Claude Code session. Every running session picks
    the new statusline up immediately and the snapshot appears within the
    same second; the tray updates on its next 30-second tick.
+5. Within a few seconds of the tray starting, the probe adds
+   `seven_day_model` (the Fable week) to the snapshot; it re-asks every
+   5 minutes. If the third number never appears, check that `claude` is on
+   the tray's PATH or set `AI_USAGE_METER_CLAUDE=/path/to/claude` in the
+   autostart environment.
 
 ## Checks
 - `cat ~/.local/state/ai-usage-meter/snapshot.json` shows
-  `providers.claude` with two windows and ISO-8601 dates.
+  `providers.claude` with three windows and ISO-8601 dates; `source` is
+  `statusline` or `usage` depending on the last writer.
 - The terminal status bar shows `<model> · <effort> · ⛁ <n>%`; the tray
   follows within 30 seconds.
 - `pgrep -af ai-usage-meter-tray` shows one process; the autostart file
   exists.
-- The 7-day number equals the `/usage` row "Current week (all models)", not
-  the per-model row.
+- The 7-day number equals the `/usage` row "Current week (all models)";
+  the third number equals "Current week (Fable)".
+- One-off probe by hand:
+  `python3 -c 'from ai_usage_meter.core import usage_probe; print(usage_probe.capture("/tmp/x"))'`
+  from the repo root prints a `ProviderUsage` with `seven_day_model` set.
 
 ## Undo
 - `make uninstall`, then remove the `statusLine` entry from settings.json.
@@ -37,6 +46,8 @@
    disabled: `gnome-extensions enable ubuntu-appindicators@ubuntu.com`.
 3. Never run the tray under a venv: `gi` comes from the system dpkg
    packages only.
+4. Never add `--bare` to the probe: it disables OAuth and `get_usage`
+   answers `rate_limits_available: false`.
 
 Related: [snapshot path](../../decisions/2026-09-06_snapshot-in-xdg-state-home.md)
 

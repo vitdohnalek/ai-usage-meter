@@ -29,6 +29,9 @@ percentage and appears at the next turn.
 - Per-model weekly windows (the /usage "Current week (Fable)" row) are not
   in the statusline payload on 2.1.261; the only source is the usage API,
   so a third meter is out of scope until Claude Code forwards them. [S3:F1][S3:F3]
+  Amended 2026-09-06: the tray now gets that window from Claude Code's own
+  `get_usage` control request, still without touching a credential; see
+  [the Fable-window decision](2026-09-06_fable-window-via-get-usage.md). [S4:F3]
 
 ## Alternatives considered
 - Endpoint polling (what public tools do): exact even between turns, but
@@ -42,4 +45,4 @@ percentage and appears at the next turn.
 Related: [host decision](2026-09-05_host-native-swift-menubarextra.md),
 [gaps](../synthesis/gaps_and_leads.md)
 
-**Last updated**: 2026-09-05
+**Last updated**: 2026-09-06

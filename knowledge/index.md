@@ -3,14 +3,14 @@
 <!-- Generated 2026-09-05 during the founding grill session -->
 
 ## Now
-- Phase: Linux port MVP built on feature/linux-port (87 tests, Python + AppIndicator); installed and wired on the Ubuntu host (as of 2026-09-06)
-- Active: first real-world use of the tray; watch whether the `!` marker and alarm icon read well on the GNOME top bar (as of 2026-09-06)
-- Next: polish pass (hook cold start ~120 ms, icon rendering check, optional systemd unit), then PR feature/linux-port -> devel via /pr-audit (as of 2026-09-06)
+- Phase: Linux port on main (108 tests, Python + AppIndicator) with a third meter, the Fable weekly window, fed by a `get_usage` probe from the tray (as of 2026-09-06)
+- Active: first real-world use of the three-number tray; watch whether the `!` marker and alarm icon read well on the GNOME top bar and whether the probe keeps answering (as of 2026-09-06)
+- Next: polish pass (hook cold start ~120 ms, icon rendering check, optional systemd unit, probe interval tuning) (as of 2026-09-06)
 - Deferred: Windows-side WSL tray reading the snapshot over \wsl$; threshold notifications; Codex as a second provider (as of 2026-09-06)
 - Known: knowledge pages dated 2026-09-05 describe the macOS original; the 2026-09-06 decisions say which ones are superseded or amended (as of 2026-09-06)
 
 ## Sources
-- [source_registry.md](sources/source_registry.md) -- registry of immutable inputs
+- [source_registry.md](sources/source_registry.md) -- registry of immutable inputs (S1-S4)
 
 ## Entities
 
@@ -24,6 +24,7 @@
 - [gaps_and_leads.md](synthesis/gaps_and_leads.md) -- open questions and leads
 
 ## Decisions
+- [2026-09-06_fable-window-via-get-usage.md](decisions/2026-09-06_fable-window-via-get-usage.md) -- third meter: the tray asks a throwaway `claude -p` for `get_usage` every 5 min and stores `seven_day_model`; amends the data-source decision's out-of-scope clause
 - [2026-09-06_linux-port-python-appindicator.md](decisions/2026-09-06_linux-port-python-appindicator.md) -- Linux-only fork in Python + PyGObject, AppIndicator tray, 30 s poll; supersedes the Swift host decisions
 - [2026-09-06_snapshot-in-xdg-state-home.md](decisions/2026-09-06_snapshot-in-xdg-state-home.md) -- snapshot at $XDG_STATE_HOME/ai-usage-meter, on ext4 for a future WSL reader; amends the snapshot contract's path clause
 - [2026-09-06_tray-label-marker-and-icon-swap.md](decisions/2026-09-06_tray-label-marker-and-icon-swap.md) -- icon + text label; `!` at 75, alarm icon at 90, text-only dropdown with block bars

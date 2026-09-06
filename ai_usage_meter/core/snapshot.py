@@ -17,12 +17,21 @@ class UsageWindow:
 
 
 @dataclass
+class ModelWindow(UsageWindow):
+    """A per-model weekly window; ``model`` is the server-supplied label."""
+    model: str = ""
+
+
+@dataclass
 class ProviderUsage:
-    """Everything the snapshot knows about one provider."""
+    """Everything the snapshot knows about one provider. ``seven_day_model``
+    is the per-model weekly bucket (the "Fable" row of ``/usage``); it is
+    additive, so documents without it still decode."""
     five_hour: Optional[UsageWindow]
     seven_day: Optional[UsageWindow]
     captured_at: datetime
     source: str
+    seven_day_model: Optional[ModelWindow] = None
 
 
 @dataclass
@@ -72,12 +81,26 @@ def _window_from_json(raw) -> UsageWindow:
     return UsageWindow(used_percentage=used, resets_at=parse_date(raw["resets_at"]))
 
 
+def _model_window_to_json(window: ModelWindow) -> dict:
+    return {**_window_to_json(window), "model": window.model}
+
+
+def _model_window_from_json(raw) -> ModelWindow:
+    window = _window_from_json(raw)
+    model = raw.get("model", "")
+    if not isinstance(model, str):
+        raise ValueError("model is not a string")
+    return ModelWindow(window.used_percentage, window.resets_at, model)
+
+
 def _provider_to_json(usage: ProviderUsage) -> dict:
     document = {"captured_at": format_date(usage.captured_at), "source": usage.source}
     if usage.five_hour is not None:
         document["five_hour"] = _window_to_json(usage.five_hour)
     if usage.seven_day is not None:
         document["seven_day"] = _window_to_json(usage.seven_day)
+    if usage.seven_day_model is not None:
+        document["seven_day_model"] = _model_window_to_json(usage.seven_day_model)
     return document
 
 
@@ -92,6 +115,8 @@ def _provider_from_json(raw) -> ProviderUsage:
         seven_day=_window_from_json(raw["seven_day"]) if "seven_day" in raw else None,
         captured_at=parse_date(raw["captured_at"]),
         source=source,
+        seven_day_model=(_model_window_from_json(raw["seven_day_model"])
+                         if "seven_day_model" in raw else None),
     )
 
 

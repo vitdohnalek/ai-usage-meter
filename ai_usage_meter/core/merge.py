@@ -26,6 +26,8 @@ def merge_provider(existing: Optional[ProviderUsage], incoming: ProviderUsage) -
         seven_day=merge_window(existing.seven_day if existing else None, incoming.seven_day),
         captured_at=incoming.captured_at,
         source=incoming.source,
+        seven_day_model=merge_window(existing.seven_day_model if existing else None,
+                                     incoming.seven_day_model),
     )
 
 

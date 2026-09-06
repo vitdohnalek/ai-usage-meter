@@ -20,7 +20,7 @@ def _number(window: WindowDisplay) -> str:
 
 
 def label_text(display: MeterDisplay) -> str:
-    return _number(display.five_hour) + SEPARATOR + _number(display.seven_day)
+    return SEPARATOR.join(_number(w) for w in display.windows)
 
 
 def icon_name(display: MeterDisplay) -> str:
@@ -33,4 +33,4 @@ def bar_text(fraction: float) -> str:
 
 
 def menu_rows(display: MeterDisplay) -> List[Tuple[str, str]]:
-    return [(w.row_text, bar_text(w.fraction)) for w in (display.five_hour, display.seven_day)]
+    return [(w.row_text, bar_text(w.fraction)) for w in display.windows]

@@ -58,3 +58,8 @@
 - source: docs/superpowers/specs/2026-09-06-linux-port-design.md; host probe of Ubuntu 24.04 / GNOME 46; architect recon of upstream v0.1.0
 - pages touched: decisions/2026-09-06_linux-port-python-appindicator.md (new), decisions/2026-09-06_snapshot-in-xdg-state-home.md (new), decisions/2026-09-06_tray-label-marker-and-icon-swap.md (new), entities/runbooks/install_and_wire.md (rewritten for Linux), index.md (Now block, catalog)
 - notes: Swift tree replaced by ai_usage_meter/ (Python, 87 unittest cases); hook and tray installed and wired on the host; WSL = hook only for now
+
+## [2026-09-06] ingest | Fable weekly window as a third meter
+- source: docs/2026-09-06_statusline-probe-3.md (S4); bundle read of Claude Code 2.1.263; three live get_usage probes
+- pages touched: decisions/2026-09-06_fable-window-via-get-usage.md (new), decisions/2026-09-05_data-source-statusline-snapshot.md (amended), synthesis/gaps_and_leads.md (lead closed, one added), entities/runbooks/install_and_wire.md, sources/source_registry.md (S4), index.md (Now block, catalog)
+- notes: snapshot gains optional seven_day_model {used_percentage, resets_at, model}; tray probes every 5 min off the GTK thread; hook unchanged; 108 tests

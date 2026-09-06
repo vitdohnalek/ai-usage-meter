@@ -3,9 +3,9 @@ from datetime import timedelta
 
 from ai_usage_meter.core import merge
 from ai_usage_meter.core.snapshot import (
-    CURRENT_SCHEMA_VERSION, ProviderUsage, Snapshot, UsageWindow,
+    CURRENT_SCHEMA_VERSION, ModelWindow, ProviderUsage, Snapshot, UsageWindow,
 )
-from tests.fixtures import CAPTURED, FIVE_RESET, SEVEN_RESET
+from tests.fixtures import CAPTURED, FIVE_RESET, MODEL_RESET, SEVEN_RESET
 
 RESET = FIVE_RESET
 LATER_RESET = FIVE_RESET + timedelta(hours=5)
@@ -60,3 +60,26 @@ class SnapshotMergeTests(unittest.TestCase):
         self.assertEqual(merged.providers["codex"], codex)
         self.assertEqual(merged.claude, incoming)
         self.assertNotIn("claude", snapshot.providers, "merge must not mutate its input")
+
+    def test_probe_write_keeps_the_statusline_windows(self):
+        existing = ProviderUsage(UsageWindow(21, RESET), UsageWindow(4, SEVEN_RESET), CAPTURED, "statusline")
+        probe = ProviderUsage(None, None, CAPTURED + timedelta(seconds=30), "usage",
+                              seven_day_model=ModelWindow(5, MODEL_RESET, "Fable"))
+        merged = merge.merge_provider(existing, probe)
+        self.assertEqual(merged.five_hour.used_percentage, 21)
+        self.assertEqual(merged.seven_day.used_percentage, 4)
+        self.assertEqual(merged.seven_day_model, probe.seven_day_model)
+        self.assertEqual(merged.source, "usage")
+
+    def test_statusline_write_keeps_the_model_window(self):
+        existing = ProviderUsage(None, None, CAPTURED, "usage", seven_day_model=ModelWindow(5, MODEL_RESET, "Fable"))
+        hook = ProviderUsage(UsageWindow(30, RESET), None, CAPTURED + timedelta(seconds=30), "statusline")
+        merged = merge.merge_provider(existing, hook)
+        self.assertEqual(merged.seven_day_model.model, "Fable")
+        self.assertEqual(merged.five_hour.used_percentage, 30)
+
+    def test_model_window_follows_the_window_rules(self):
+        old = ModelWindow(80, MODEL_RESET, "Fable")
+        newer = ModelWindow(2, MODEL_RESET + timedelta(days=7), "Fable")
+        self.assertEqual(merge.merge_window(old, newer), newer)
+        self.assertEqual(merge.merge_window(old, ModelWindow(50, MODEL_RESET, "Fable")), old)

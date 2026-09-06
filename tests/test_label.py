@@ -2,16 +2,17 @@ import unittest
 from datetime import timedelta
 
 from ai_usage_meter.core.display import make
-from ai_usage_meter.core.snapshot import ProviderUsage, Snapshot, UsageWindow
+from ai_usage_meter.core.snapshot import ModelWindow, ProviderUsage, Snapshot, UsageWindow
 from ai_usage_meter.tray import label
-from tests.fixtures import CAPTURED as NOW, FIVE_RESET, SEVEN_RESET
+from tests.fixtures import CAPTURED as NOW, FIVE_RESET, MODEL_RESET, SEVEN_RESET
 
 
-def display(five, seven, now=NOW):
+def display(five, seven, now=NOW, model=None):
     snapshot = Snapshot(schema_version=1, providers={"claude": ProviderUsage(
         five_hour=UsageWindow(five, FIVE_RESET) if five is not None else None,
         seven_day=UsageWindow(seven, SEVEN_RESET) if seven is not None else None,
-        captured_at=NOW - timedelta(seconds=120), source="statusline")})
+        captured_at=NOW - timedelta(seconds=120), source="statusline",
+        seven_day_model=ModelWindow(model, MODEL_RESET, "Fable") if model is not None else None)})
     return make(snapshot, now)
 
 
@@ -52,3 +53,11 @@ class LabelTests(unittest.TestCase):
     def test_icons_exist_as_files(self):
         for name in (label.NORMAL_ICON, label.ALARM_ICON):
             self.assertTrue((label.ICON_DIR / f"{name}.svg").is_file(), name)
+
+    def test_model_window_is_the_third_number(self):
+        self.assertEqual(label.label_text(display(21, 4, model=5)), "21% · 4% · 5%")
+        self.assertEqual(label.label_text(display(21, 4, model=91)), "21% · 4% · 91%!")
+        self.assertEqual(label.icon_name(display(21, 4, model=91)), label.ALARM_ICON)
+        rows = label.menu_rows(display(42, 18, model=5))
+        self.assertEqual(len(rows), 3)
+        self.assertEqual(rows[2], ("Fable  5% · resets in 1d 07h", "▰▱▱▱▱▱▱▱▱▱"))

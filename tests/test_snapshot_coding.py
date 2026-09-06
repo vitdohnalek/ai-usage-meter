@@ -2,10 +2,10 @@ import json
 import unittest
 
 from ai_usage_meter.core.snapshot import (
-    CLAUDE_PROVIDER_ID, CURRENT_SCHEMA_VERSION, ProviderUsage, Snapshot, UsageWindow,
+    CLAUDE_PROVIDER_ID, CURRENT_SCHEMA_VERSION, ModelWindow, ProviderUsage, Snapshot, UsageWindow,
     decode, encode,
 )
-from tests.fixtures import CAPTURED, FIVE_RESET, SEVEN_RESET
+from tests.fixtures import CAPTURED, FIVE_RESET, MODEL_RESET, SEVEN_RESET
 
 
 def sample():
@@ -62,3 +62,22 @@ class SnapshotCodingTests(unittest.TestCase):
                     b'{"schema_version":1,"providers":{"claude":{"captured_at":"x","source":"s"}}}']:
             with self.assertRaises(ValueError):
                 decode(bad)
+
+    def test_model_window_round_trips_and_is_optional(self):
+        snapshot = sample()
+        self.assertIsNone(decode(encode(snapshot)).claude.seven_day_model)
+        snapshot.claude.seven_day_model = ModelWindow(5, MODEL_RESET, "Fable")
+        text = encode(snapshot).decode("utf-8")
+        self.assertIn('"seven_day_model": {', text)
+        self.assertIn('"model": "Fable"', text)
+        self.assertIn("2026-09-06T18:59:59Z", text)
+        decoded = decode(text.encode("utf-8"))
+        self.assertEqual(decoded.claude.seven_day_model.model, "Fable")
+        self.assertEqual(decoded.claude.seven_day_model.used_percentage, 5)
+        self.assertEqual(decoded.claude.seven_day_model.resets_at, MODEL_RESET.replace(microsecond=0))
+
+    def test_model_window_with_bad_label_is_rejected(self):
+        bad = b'{"schema_version":1,"providers":{"claude":{"captured_at":"2026-09-05T11:48:12Z","source":"s",' \
+              b'"seven_day_model":{"used_percentage":5,"resets_at":"2026-09-06T18:59:59Z","model":7}}}}'
+        with self.assertRaises(ValueError):
+            decode(bad)

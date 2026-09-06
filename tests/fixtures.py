@@ -29,3 +29,18 @@ ONLY_FIVE_HOUR_JSON = b"""
  "context_window":{"used_percentage":40.6},
  "rate_limits":{"five_hour":{"used_percentage":55.4,"resets_at":1788617400}}}
 """
+
+MODEL_RESET = datetime(2026, 9, 6, 18, 59, 59, 988722, tzinfo=timezone.utc)
+
+# What ``claude -p --output-format stream-json`` prints for a ``get_usage``
+# control request on 2.1.263, trimmed to the fields that matter plus noise.
+USAGE_RESPONSE_JSONL = b"""not json at all
+{"type":"system","subtype":"init","session_id":"fd861edf"}
+{"type":"control_response","response":{"subtype":"success","request_id":"ai-usage-meter","response":{"session":{"total_cost_usd":0},"subscription_type":"max","rate_limits_available":true,"rate_limits":{"five_hour":{"utilization":24,"resets_at":"2026-09-06T17:59:59.689325+00:00"},"seven_day":{"utilization":3,"resets_at":"2026-09-06T18:59:59.689371+00:00"},"model_scoped":[{"display_name":"Fable","utilization":5.4,"resets_at":"2026-09-06T18:59:59.988722+00:00"},{"display_name":"Opus","utilization":61,"resets_at":"2026-09-06T18:59:59.988722+00:00"}]},"behaviors":null}}}
+"""
+
+USAGE_ERROR_JSONL = b"""{"type":"control_response","response":{"subtype":"error","request_id":"ai-usage-meter","error":"boom"}}
+"""
+
+USAGE_NO_MODEL_JSONL = b"""{"type":"control_response","response":{"subtype":"success","request_id":"ai-usage-meter","response":{"rate_limits_available":false,"rate_limits":null}}}
+"""
