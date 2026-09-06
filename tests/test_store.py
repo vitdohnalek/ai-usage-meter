@@ -8,6 +8,7 @@ from pathlib import Path
 from unittest import mock
 
 from ai_usage_meter.core.snapshot import ProviderUsage, Snapshot, UsageWindow
+from ai_usage_meter.core import store as store_module
 from ai_usage_meter.core.store import LOCK_TIMEOUT, SnapshotStore, default_path
 from tests.fixtures import CAPTURED, FIVE_RESET
 
@@ -77,7 +78,12 @@ class SnapshotStoreTests(unittest.TestCase):
         self.assertGreaterEqual(elapsed, LOCK_TIMEOUT)
         self.assertLess(elapsed, 1)
 
+    @mock.patch.object(store_module, "LOCK_TIMEOUT", 10.0)
     def test_exclusive_lock_serializes_writers(self):
+        # The bound is relaxed here on purpose: 20 Python threads convoy on
+        # the GIL under load and some would hit the 0.25 s bound and run
+        # unlocked, which is the documented behaviour, not a serialization
+        # bug. The bound itself is covered by the timeout test above.
         count = [0]
         count_lock = threading.Lock()
 

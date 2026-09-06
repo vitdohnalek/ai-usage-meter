@@ -18,7 +18,7 @@ class HookRunnerTests(unittest.TestCase):
         self.store = SnapshotStore(Path(self.tmp.name) / "snapshot.json")
 
     def test_writes_snapshot_and_returns_line(self):
-        self.assertEqual(run(SAMPLE_PAYLOAD_JSON, self.store, CAPTURED), "Fable 5.1 · high · ⛁ 12%")
+        self.assertEqual(run(SAMPLE_PAYLOAD_JSON, self.store, CAPTURED), "Fable 5.1 · high · ⛁ 12% (119k/1M)")
         snapshot = self.store.read()
         self.assertEqual(snapshot.claude.five_hour, UsageWindow(21, FIVE_RESET))
         self.assertEqual(snapshot.claude.seven_day, UsageWindow(4, SEVEN_RESET))
@@ -54,7 +54,7 @@ class HookRunnerTests(unittest.TestCase):
 
     def test_unwritable_store_does_not_raise_or_change_the_line(self):
         store = SnapshotStore(Path("/proc/ai-usage-meter-cannot-write/snapshot.json"))
-        self.assertEqual(run(SAMPLE_PAYLOAD_JSON, store, CAPTURED), "Fable 5.1 · high · ⛁ 12%")
+        self.assertEqual(run(SAMPLE_PAYLOAD_JSON, store, CAPTURED), "Fable 5.1 · high · ⛁ 12% (119k/1M)")
 
     def test_huge_context_percentage_returns_a_line(self):
         self.assertEqual(run(b'{"context_window":{"used_percentage":1e300}}', self.store, CAPTURED), "Claude · ⛁ 1000%")
