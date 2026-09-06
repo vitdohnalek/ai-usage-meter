@@ -17,11 +17,12 @@ render. The snapshot contract is untouched.
 
 ## Why
 The user wants to see every open session's context and remaining cache
-time from the tray. Each Claude Code session runs its own hook, so a
-per-session file has exactly one writer and needs no lock, and the
-`refreshInterval` of 60 s already in the settings snippet makes "updated
-in the last three minutes" a sound liveness test: a closed session goes
-quiet within one interval. Putting sessions into the snapshot would have
+time from the tray, and closed sessions must vanish at once: the first
+version used "rendered in the last three minutes" and the user saw closed
+sessions linger (2026-09-06). Each Claude Code session runs its own hook,
+so a per-session file has exactly one writer and needs no lock, and the
+hook's parent chain (`python3 -> bash -> claude`) names the process whose
+lifetime is the session's. Putting sessions into the snapshot would have
 grown the provider-keyed contract with unrelated, high-churn data and put
 every hook run through the flock.
 
@@ -36,8 +37,11 @@ every hook run through the flock.
 - Reading Claude Code's own session files under `~/.claude/projects/`:
   rejected, that tree is transcripts and private state, and the meter
   never reads Claude Code's files.
-- Detecting liveness by process: the hook has no parent pid it can trust
-  and the tray must not scan processes; time since last render is enough.
+- Time since last render as the only liveness test: kept as the fallback
+  only; with a 60 s refresh it cannot drop a closed session in under about
+  three minutes without flickering live ones.
+- Scanning all processes from the tray: rejected; the tray only stats the
+  one pid each file names, and matches its start time against pid reuse.
 
 Related: [terminal line](2026-09-06_terminal-line-segments.md),
 [snapshot contract](2026-09-05_snapshot-contract.md)

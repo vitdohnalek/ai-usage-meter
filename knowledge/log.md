@@ -94,3 +94,8 @@
 - source: user request (per-session context and cache time left); statusline docs field table (S1)
 - pages touched: decisions/2026-09-06_session-files-beside-the-snapshot.md (new), entities/runbooks/install_and_wire.md, index.md (catalog, Now block)
 - notes: core/sessions.py (record, store, liveness 180 s, prune 1 d); hook writes the record after the merge; tray shows up to 8 rows under "Sessions (n)"; 134 tests
+
+## [2026-09-06] ingest | Session liveness by process, not by age
+- source: user report (closed sessions still listed); /proc inspection of the hook's parent chain
+- pages touched: decisions/2026-09-06_session-files-beside-the-snapshot.md (amended), entities/runbooks/install_and_wire.md
+- notes: sessions.find_owner walks /proc up to the `claude` comm; record carries owner_pid/owner_start; live() checks the process, 180 s age only as fallback; prune drops gone processes; 140 tests
