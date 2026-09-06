@@ -8,7 +8,8 @@
    restarts the tray, and prints the settings snippet. `make install-hook`
    installs only the hook (WSL, no GNOME).
 3. Paste the printed `statusLine` object into `~/.claude/settings.json`
-   by hand. The installer never edits that file by
+   by hand; it carries `"refreshInterval": 60` so the cache countdown ticks
+   while idle. The installer never edits that file by
    [decision](../../decisions/upstream/2026-09-05_hook-is-a-swift-target.md).
 4. Send one prompt in any Claude Code session. Every running session picks
    the new statusline up immediately and the snapshot appears within the

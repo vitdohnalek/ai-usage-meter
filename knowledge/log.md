@@ -84,3 +84,8 @@
 - source: user request; snapshot already carries seven_day_model from the tray probe
 - pages touched: decisions/2026-09-06_terminal-line-segments.md (amended), entities/runbooks/install_and_wire.md, index.md (catalog)
 - notes: hook_runner reads the stored seven_day_model after the merge and passes it to line.render(model_window=); 122 tests
+
+## [2026-09-06] ingest | statusLine snippet ships refreshInterval 60
+- source: user feedback (the cache countdown must tick by default)
+- pages touched: decisions/2026-09-06_terminal-line-segments.md (amended), entities/runbooks/install_and_wire.md
+- notes: Makefile snippet target prints "refreshInterval": 60; applied to the host settings.json with a backup

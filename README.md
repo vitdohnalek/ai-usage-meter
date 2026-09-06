@@ -23,10 +23,11 @@ itself for the per-model window, and the tray reads that file.
    per-model week (`Fable 5%`) follows once the tray's probe has written it
    to the snapshot, so it is absent on hook-only installs such as WSL. `cache`
    is the prompt cache: a countdown while the cached prefix is warm, `cache
-   cold` when the next turn re-bills the whole context. The line only
-   re-renders after a turn, so add `"refreshInterval": 60` to the
-   `statusLine` object if you want the countdown to tick while idle. Set
-   `NO_COLOR` in the environment to get plain text.
+   cold` when the next turn re-bills the whole context. The settings
+   snippet the installer prints includes `"refreshInterval": 60`, so the
+   countdown keeps ticking while you are idle; without it the line only
+   re-renders after a turn. Set `NO_COLOR` in the environment to get plain
+   text.
 3. Every 5 minutes the tray runs a throwaway `claude -p` process and sends
    it the SDK control request `get_usage`; Claude Code answers with the
    per-model weekly bucket that `/usage` shows as "Current week (Fable)"

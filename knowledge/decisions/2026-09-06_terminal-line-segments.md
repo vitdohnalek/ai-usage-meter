@@ -44,7 +44,9 @@ emphasis a one-line status bar has.
 - A `>200k` text marker: rejected in favour of the red token count, which
   says the same without widening the line.
 - Ticking the countdown from the hook: impossible, the hook runs only when
-  Claude Code re-renders; documented `refreshInterval` instead.
+  Claude Code re-renders, so the printed settings snippet carries
+  `"refreshInterval": 60` (one hook run a minute per open session, about
+  120 ms each; the countdown itself has minute resolution).
 
 Related: [tray label](2026-09-06_tray-label-marker-and-icon-swap.md),
 [data source](2026-09-05_data-source-statusline-snapshot.md)

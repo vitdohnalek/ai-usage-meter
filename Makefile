@@ -57,7 +57,8 @@ snippet:
 	@echo ""
 	@echo '  "statusLine": {'
 	@echo '    "type": "command",'
-	@echo '    "command": "$(HOOK_DEST)"'
+	@echo '    "command": "$(HOOK_DEST)",'
+	@echo '    "refreshInterval": 60'
 	@echo '  }'
 	@echo ""
 
