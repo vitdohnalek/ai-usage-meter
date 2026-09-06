@@ -3,11 +3,11 @@
 <!-- Generated 2026-09-05 during the founding grill session -->
 
 ## Now
-- Phase: v0.1.0 released; PR #1 merged to devel, PR #2 to main, tag v0.1.0 on main, devel synced (as of 2026-09-05)
-- Active: watch whether the 30 s cadence and the 75/90 rules feel right; hook wired into settings.json on 2026-09-05 and reporting live (as of 2026-09-05)
-- Next: live with it; act on the gaps_and_leads triggers if one fires (resets_at unit, per-model window, schema bump) (as of 2026-09-05)
-- Deferred: threshold notifications; Codex as a second provider (see synthesis/gaps_and_leads.md) (as of 2026-09-05)
-- Known: per-model weekly usage (the /usage Fable row) is not in the statusline payload; the builder emits five_hour, seven_day, spend_limit only, and the Fable row comes from the usage API the meter never calls (probe 2, S3) (as of 2026-09-05)
+- Phase: Linux port MVP built on feature/linux-port (87 tests, Python + AppIndicator); installed and wired on the Ubuntu host (as of 2026-09-06)
+- Active: first real-world use of the tray; watch whether the `!` marker and alarm icon read well on the GNOME top bar (as of 2026-09-06)
+- Next: polish pass (hook cold start ~120 ms, icon rendering check, optional systemd unit), then PR feature/linux-port -> devel via /pr-audit (as of 2026-09-06)
+- Deferred: Windows-side WSL tray reading the snapshot over \wsl$; threshold notifications; Codex as a second provider (as of 2026-09-06)
+- Known: knowledge pages dated 2026-09-05 describe the macOS original; the 2026-09-06 decisions say which ones are superseded or amended (as of 2026-09-06)
 
 ## Sources
 - [source_registry.md](sources/source_registry.md) -- registry of immutable inputs
@@ -18,12 +18,15 @@
 ### Integrations
 ### Data formats
 ### Runbooks
-- [install_and_wire.md](entities/runbooks/install_and_wire.md) -- make install, paste the snippet, verify, undo, toolchain traps
+- [install_and_wire.md](entities/runbooks/install_and_wire.md) -- Linux: make install / install-hook, paste the snippet, verify, undo, toolchain traps
 
 ## Synthesis
 - [gaps_and_leads.md](synthesis/gaps_and_leads.md) -- open questions and leads
 
 ## Decisions
+- [2026-09-06_linux-port-python-appindicator.md](decisions/2026-09-06_linux-port-python-appindicator.md) -- Linux-only fork in Python + PyGObject, AppIndicator tray, 30 s poll; supersedes the Swift host decisions
+- [2026-09-06_snapshot-in-xdg-state-home.md](decisions/2026-09-06_snapshot-in-xdg-state-home.md) -- snapshot at $XDG_STATE_HOME/ai-usage-meter, on ext4 for a future WSL reader; amends the snapshot contract's path clause
+- [2026-09-06_tray-label-marker-and-icon-swap.md](decisions/2026-09-06_tray-label-marker-and-icon-swap.md) -- icon + text label; `!` at 75, alarm icon at 90, text-only dropdown with block bars
 - [2026-09-05_data-source-statusline-snapshot.md](decisions/2026-09-05_data-source-statusline-snapshot.md) -- read usage from the official statusline JSON via a snapshot file; never touch credentials
 - [2026-09-05_host-native-swift-menubarextra.md](decisions/2026-09-05_host-native-swift-menubarextra.md) -- native SwiftPM app with MenuBarExtra, no third-party runtime
 - [2026-09-05_snapshot-contract.md](decisions/2026-09-05_snapshot-contract.md) -- provider-keyed snapshot in Application Support, atomic rename, absence preserved
@@ -33,4 +36,4 @@
 - [2026-09-05_glyph-embedded-svg-string.md](decisions/2026-09-05_glyph-embedded-svg-string.md) -- glyph travels as a Swift string constant, byte-identical to assets/claude.svg; no resource bundle
 - [2026-09-05_pr-1_audit.md](decisions/2026-09-05_pr-1_audit.md) -- v1 merges as audited; hollow rate_limits no longer refreshes captured_at; low notes recorded, not ticketed
 
-**Last updated**: 2026-09-05
+**Last updated**: 2026-09-06

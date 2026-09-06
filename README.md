@@ -1,49 +1,70 @@
-# ai-usage-meter
+# ai-usage-meter (Linux)
 
-A macOS menu-bar meter for Claude Code's 5-hour and 7-day rate-limit
-utilization. It never touches a credential: Claude Code's own statusline
-hook writes a small snapshot file, and the menu-bar app reads that file.
+A tray meter for Claude Code's 5-hour and 7-day rate-limit utilization on
+Ubuntu / GNOME, forked from
+[DanielZucha/ai-usage-meter](https://github.com/DanielZucha/ai-usage-meter)
+(the macOS original). It never touches a credential: Claude Code's own
+statusline hook writes a small snapshot file, and the tray app reads that
+file.
 
 ## How it works
 
 1. Claude Code runs `ai-usage-meter-hook` as its statusline command after
    every API response, passing the documented statusline JSON on stdin.
 2. The hook merges the `rate_limits` block into
-   `~/Library/Application Support/ai-usage-meter/snapshot.json` and prints
-   one line back to the terminal: `Fable 5.1 · high · ⛁ 12%` (the effort
-   word is omitted when Claude Code does not send one; the cylinder is the
-   same U+26C1 symbol /context uses for the context window). The 5-hour
-   and 7-day rate limits live in the menu bar, not the terminal line.
-3. The menu-bar app re-reads the snapshot every 30 seconds and shows the
-   Claude glyph with `21% · 4%`. A number turns bold at 75 percent; at 90
-   percent the whole label flips to black on a white background. Clicking
-   the item opens a panel with one pill bar per window, the snapshot age,
-   and Quit. Windows that have reset show 0 percent until the next turn.
+   `~/.local/state/ai-usage-meter/snapshot.json` (or `$XDG_STATE_HOME`)
+   and prints one line back to the terminal: `Fable 5.1 · high · ⛁ 12%`
+   (effort omitted when Claude Code does not send one; the cylinder is the
+   U+26C1 symbol /context uses for the context window).
+3. The tray app re-reads the snapshot every 30 seconds and shows the Claude
+   glyph with `21% · 4%`. A number at 75 percent or more gets a `!`
+   (`78%! · 4%`); at 90 percent the glyph swaps to a red-on-white alarm
+   icon. Clicking the item opens a menu with one row per window, a ten-cell
+   bar, the countdown to reset, the snapshot age, and Quit. Windows that
+   have reset show 0 percent until the next turn.
+
+The snapshot format is byte-compatible with the macOS original.
+
+## Requirements
+
+Ubuntu 24.04 (or any GNOME on Wayland/X11) with:
+
+- `python3` (3.10+), standard library only for the hook
+- for the tray: `python3-gi`, `gir1.2-gtk-3.0`, `gir1.2-appindicator3-0.1`,
+  and the `gnome-shell-extension-appindicator` extension enabled (Ubuntu
+  ships it enabled)
+
+`make install-tray` checks these and tells you what to install.
 
 ## Install
-
-Requires macOS 14 or later and Swift 6 from the Command Line Tools.
 
     make test
     make install
 
-Tests must run through `make test`, never bare `swift test`: the Command
-Line Tools' SwiftPM does not wire in swift-testing on its own, and the
-Makefile adds the flags that make it work.
+`make install` copies the package to `~/.local/share/ai-usage-meter`,
+writes `ai-usage-meter-hook` and `ai-usage-meter-tray` to `~/.local/bin`,
+adds an autostart entry, launches the tray, and prints the `statusLine`
+snippet for `~/.claude/settings.json`. Paste that snippet yourself; the
+installer never edits that file.
 
-`make install` builds a release, assembles `AI Usage Meter.app`, copies it
-to `~/Applications`, copies the hook to `~/.local/bin`, launches the app,
-and prints the `statusLine` snippet for `~/.claude/settings.json`. Paste
-that snippet yourself; the installer never edits that file. The app
-registers itself to launch at login.
+    make install-hook     hook only (WSL, servers, non-GNOME desktops)
+    make install-tray     tray only
+    make uninstall        remove everything except the snapshot
 
-`make uninstall` removes the app and the hook.
+## WSL
+
+Inside WSL run `make install-hook`: the terminal line and the snapshot work
+unchanged. There is no Linux tray in WSL; the snapshot stays on the Linux
+filesystem so a future Windows-side tray can read it at
+`\\wsl$\<distro>\home\<user>\.local\state\ai-usage-meter\snapshot.json`.
+That Windows tray is not built yet.
 
 ## Layout
 
-    Sources/MeterCore      schema, parsing, merge, storage, formatting (tested)
-    Sources/MeterHook      the statusline executable
-    Sources/AIUsageMeter   the SwiftUI MenuBarExtra shell
-    Tests/MeterCoreTests   Swift Testing suites
-    packaging/             Info.plist for the app bundle
+    ai_usage_meter/core    schema, parsing, merge, storage, formatting (tested)
+    ai_usage_meter/hook.py the statusline entrypoint
+    ai_usage_meter/tray    label rules (tested) and the AppIndicator shell
+    ai_usage_meter/assets  tray icons
+    tests/                 unittest suite: make test
+    packaging/             autostart .desktop template
     knowledge/             project wiki: decisions, runbooks, log

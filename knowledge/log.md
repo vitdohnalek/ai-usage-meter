@@ -53,3 +53,8 @@
 - source: PR #1 (devel, merge 27bc05d), PR #2 (main, merge 3d3c9e6), tag v0.1.0
 - pages touched: index.md (Now block)
 - notes: first release; no code change since the audit
+
+## [2026-09-06] ingest | Linux port MVP (fork vitdohnalek/ai-usage-meter)
+- source: docs/superpowers/specs/2026-09-06-linux-port-design.md; host probe of Ubuntu 24.04 / GNOME 46; architect recon of upstream v0.1.0
+- pages touched: decisions/2026-09-06_linux-port-python-appindicator.md (new), decisions/2026-09-06_snapshot-in-xdg-state-home.md (new), decisions/2026-09-06_tray-label-marker-and-icon-swap.md (new), entities/runbooks/install_and_wire.md (rewritten for Linux), index.md (Now block, catalog)
+- notes: Swift tree replaced by ai_usage_meter/ (Python, 87 unittest cases); hook and tray installed and wired on the host; WSL = hook only for now

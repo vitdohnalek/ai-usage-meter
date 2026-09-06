@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=AI Usage Meter
+Comment=Claude Code rate-limit meter in the tray
+Exec=@TRAY@
+Icon=ai-usage-meter-symbolic
+Terminal=false
+NoDisplay=true
+X-GNOME-Autostart-enabled=true

@@ -1,14 +1,10 @@
-# Swift / SwiftPM
-.build/
-*.xcodeproj
-*.xcworkspace
-.swiftpm/
-DerivedData/
+# Python
+__pycache__/
+*.pyc
+.pytest_cache/
 
 # Local artifacts
 dist/
-*.app
-.DS_Store
 .idea/
 .vscode/
 
