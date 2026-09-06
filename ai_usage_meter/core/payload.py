@@ -64,6 +64,8 @@ class StatuslinePayload:
     effort_level: Optional[str]
     context_used_percentage: Optional[float]
     rate_limits: Optional[RateLimits]
+    context_tokens: Optional[float] = None       # total_input_tokens: what is in the window now
+    context_window_size: Optional[float] = None  # context_window_size for the current model
 
     @classmethod
     def decode(cls, data: bytes) -> "StatuslinePayload":
@@ -82,6 +84,8 @@ class StatuslinePayload:
             effort_level=_string(effort.get("level")) if isinstance(effort, dict) else None,
             context_used_percentage=_number(context.get("used_percentage")) if isinstance(context, dict) else None,
             rate_limits=RateLimits.from_json(document.get("rate_limits")),
+            context_tokens=_number(context.get("total_input_tokens")) if isinstance(context, dict) else None,
+            context_window_size=_number(context.get("context_window_size")) if isinstance(context, dict) else None,
         )
 
     def provider_usage(self, captured_at: datetime) -> Optional[ProviderUsage]:

@@ -13,6 +13,8 @@ class StatuslinePayloadTests(unittest.TestCase):
         self.assertEqual(payload.model_display_name, "Fable 5.1")
         self.assertEqual(payload.effort_level, "high")
         self.assertEqual(payload.context_used_percentage, 12)
+        self.assertEqual(payload.context_tokens, 118695)
+        self.assertEqual(payload.context_window_size, 1_000_000)
         self.assertEqual(payload.rate_limits.five_hour.used_percentage, 21)
         self.assertEqual(payload.rate_limits.five_hour.resets_at, 1_788_617_400)
         self.assertEqual(payload.rate_limits.seven_day.used_percentage, 4)

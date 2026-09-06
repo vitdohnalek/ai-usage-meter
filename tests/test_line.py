@@ -9,7 +9,7 @@ from tests.fixtures import NO_RATE_LIMITS_JSON, ONLY_FIVE_HOUR_JSON, SAMPLE_PAYL
 class StatuslineLineTests(unittest.TestCase):
     def test_renders_model_effort_and_context(self):
         payload = StatuslinePayload.decode(SAMPLE_PAYLOAD_JSON)
-        self.assertEqual(line.render(payload), "Fable 5.1 · high · ⛁ 12%")
+        self.assertEqual(line.render(payload), "Fable 5.1 · high · ⛁ 12% (119k/1M)")
 
     def test_omits_effort_when_absent(self):
         payload = StatuslinePayload.decode(NO_RATE_LIMITS_JSON)
@@ -44,3 +44,17 @@ class StatuslineLineTests(unittest.TestCase):
         self.assertNotIn("\n", rendered)
         self.assertNotIn("\r", rendered)
         self.assertEqual(rendered, "Fable 5.1 · hi gh · ⛁ --")
+
+    def test_token_count_formats(self):
+        for value, text in [(0, "0"), (512, "512"), (999, "999"), (1000, "1k"), (118695, "119k"),
+                            (199_500, "200k"), (999_499, "999k"), (1_000_000, "1M"), (1_250_000, "1.25M"),
+                            (None, None), (-5, None), (float("inf"), None)]:
+            self.assertEqual(line.compact_tokens(value), text, value)
+
+    def test_tokens_without_size_and_size_without_tokens(self):
+        payload = StatuslinePayload.decode(b'{"context_window":{"used_percentage":12,"total_input_tokens":118695}}')
+        self.assertEqual(line.render(payload), "Claude · ⛁ 12% (119k)")
+        payload = StatuslinePayload.decode(b'{"context_window":{"used_percentage":12,"context_window_size":200000}}')
+        self.assertEqual(line.render(payload), "Claude · ⛁ 12%")
+        payload = StatuslinePayload.decode(b'{"context_window":{"total_input_tokens":"lots","context_window_size":true}}')
+        self.assertEqual(line.render(payload), "Claude · ⛁ --")

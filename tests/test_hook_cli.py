@@ -27,7 +27,7 @@ class HookCliTests(unittest.TestCase):
         result = self.run_hook(SAMPLE_PAYLOAD_JSON)
         self.assertEqual(result.returncode, 0)
         self.assertEqual(result.stderr, b"")
-        self.assertEqual(result.stdout.decode("utf-8"), "Fable 5.1 · high · ⛁ 12%\n")
+        self.assertEqual(result.stdout.decode("utf-8"), "Fable 5.1 · high · ⛁ 12% (119k/1M)\n")
         path = Path(self.tmp.name) / "ai-usage-meter" / "snapshot.json"
         document = json.loads(path.read_text())
         self.assertEqual(document["schema_version"], 1)

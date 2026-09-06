@@ -13,9 +13,11 @@ itself for the per-model window, and the tray reads that file.
    every API response, passing the documented statusline JSON on stdin.
 2. The hook merges the `rate_limits` block into
    `~/.local/state/ai-usage-meter/snapshot.json` (or `$XDG_STATE_HOME`)
-   and prints one line back to the terminal: `Fable 5.1 · high · ⛁ 12%`
-   (effort omitted when Claude Code does not send one; the cylinder is the
-   U+26C1 symbol /context uses for the context window).
+   and prints one line back to the terminal:
+   `Fable 5.1 · high · ⛁ 12% (119k/1M)`. Effort is omitted when Claude
+   Code does not send one; the cylinder is the U+26C1 symbol /context uses
+   for the context window, followed by the percentage used and the token
+   count over the model's window size.
 3. Every 5 minutes the tray runs a throwaway `claude -p` process and sends
    it the SDK control request `get_usage`; Claude Code answers with the
    per-model weekly bucket that `/usage` shows as "Current week (Fable)"
