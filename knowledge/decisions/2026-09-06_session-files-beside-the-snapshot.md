@@ -4,12 +4,16 @@
 On every render the hook writes `sessions/<safe id>-<hash>.json` next to
 the snapshot: session id, name (the session's own name, else the project
 directory's basename), model, context percentage and tokens, prompt-cache
-warmth and expiry, and `updated_at`. The tray lists the files updated
-within the last three minutes as inert dropdown rows
+warmth and expiry, `updated_at`, and the pid and start time of the
+`claude` process found by walking up the hook's parent chain in `/proc`.
+The tray lists a session while that process still exists (same pid, same
+start time, so a reused pid does not count) as inert dropdown rows
 (`cartagenum  ⛁ 61% · cache 12m`; the token count stays in the
 terminal line) under a `Sessions (n)`
-header, hides the section when there are none, and deletes files older
-than a day. The snapshot contract is untouched.
+header, hides the section when there are none, and deletes the files of
+gone processes and anything older than a day. When the hook finds no
+`claude` ancestor, the session is live for three minutes after its last
+render. The snapshot contract is untouched.
 
 ## Why
 The user wants to see every open session's context and remaining cache

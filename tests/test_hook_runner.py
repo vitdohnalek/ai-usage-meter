@@ -83,3 +83,11 @@ class HookRunnerTests(unittest.TestCase):
         self.assertEqual(live[0].context_used_percentage, 12)
         run(b'{"context_window":{"used_percentage":5}}', self.store, CAPTURED)
         self.assertEqual(len(sessions.SessionStore.for_snapshot(self.store.path).live(CAPTURED)), 1)
+
+    def test_session_record_carries_the_hook_owner_when_known(self):
+        from unittest import mock
+        from ai_usage_meter.core import sessions
+        with mock.patch.object(sessions, "find_owner", return_value=(4242, 99)):
+            run(SAMPLE_PAYLOAD_JSON, self.store, CAPTURED)
+        record = sessions.SessionStore.for_snapshot(self.store.path).read_all()[0]
+        self.assertEqual((record.owner_pid, record.owner_start), (4242, 99))

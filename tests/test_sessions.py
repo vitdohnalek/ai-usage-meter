@@ -108,3 +108,59 @@ class StoreTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+def fake_proc(root: Path, pid: int, comm: str, ppid: int, start: int) -> None:
+    (root / str(pid)).mkdir(parents=True, exist_ok=True)
+    tail = " ".join(["0"] * 30)
+    (root / str(pid) / "stat").write_text(f"{pid} ({comm}) S {ppid} 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 {start} {tail}\n")
+
+
+class OwnerTests(unittest.TestCase):
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmp.cleanup)
+        self.proc = Path(self.tmp.name) / "proc"
+        fake_proc(self.proc, 1, "systemd", 0, 1)
+        fake_proc(self.proc, 4166, "gnome-terminal-", 1, 10)
+        fake_proc(self.proc, 102456, "claude", 4166, 75177828)
+        fake_proc(self.proc, 119439, "bash", 102456, 75900000)
+        fake_proc(self.proc, 119451, "python3", 119439, 75900100)
+
+    def test_walks_up_to_the_claude_process(self):
+        self.assertEqual(sessions.find_owner(119451, proc=self.proc), (102456, 75177828))
+        self.assertEqual(sessions.find_owner(119439, proc=self.proc), (102456, 75177828))
+
+    def test_no_claude_ancestor_or_missing_proc_means_unknown(self):
+        self.assertIsNone(sessions.find_owner(4166, proc=self.proc))
+        self.assertIsNone(sessions.find_owner(424242, proc=self.proc))
+        self.assertIsNone(sessions.find_owner(119451, proc=Path(self.tmp.name) / "nowhere"))
+
+    def test_owner_alive_needs_same_pid_and_start_time(self):
+        self.assertTrue(sessions.owner_alive(102456, 75177828, proc=self.proc))
+        self.assertFalse(sessions.owner_alive(102456, 1, proc=self.proc))  # pid reused
+        self.assertFalse(sessions.owner_alive(999999, 75177828, proc=self.proc))
+
+    def test_from_payload_records_the_owner(self):
+        record = sessions.from_payload(StatuslinePayload.decode(SAMPLE_PAYLOAD_JSON), NOW, owner=(102456, 75177828))
+        self.assertEqual((record.owner_pid, record.owner_start), (102456, 75177828))
+        self.assertEqual(sessions.decode(sessions.encode(record)), record)
+        self.assertIsNone(sessions.decode(b'{"session_id":"x","updated_at":"2026-09-05T11:48:12Z","owner_pid":"7"}').owner_pid)
+
+    def test_live_drops_a_session_whose_process_is_gone_at_once(self):
+        store = sessions.SessionStore(Path(self.tmp.name) / "sessions")
+        def record(session_id, owner, age=0):
+            return sessions.SessionRecord(session_id, session_id, "/p", None, 1, None, None, None, None,
+                                          NOW - timedelta(seconds=age), owner_pid=owner and owner[0],
+                                          owner_start=owner and owner[1])
+        store.write(record("running", (102456, 75177828)))
+        store.write(record("running-but-quiet", (102456, 75177828), age=3600))
+        store.write(record("closed", (777, 5)))
+        store.write(record("reused-pid", (102456, 5)))
+        store.write(record("unknown-owner-fresh", None, age=100))
+        store.write(record("unknown-owner-stale", None, age=200))
+        live = sorted(r.session_id for r in store.live(NOW, proc=self.proc))
+        self.assertEqual(live, ["running", "running-but-quiet", "unknown-owner-fresh"])
+        store.prune(NOW, proc=self.proc)
+        self.assertEqual(sorted(r.session_id for r in store.read_all()),
+                         ["running", "running-but-quiet", "unknown-owner-fresh", "unknown-owner-stale"])

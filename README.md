@@ -43,13 +43,16 @@ itself for the per-model window, and the tray reads that file.
    window, a ten-cell bar, the countdown to reset, the snapshot age, a
    "Show numbers in top bar" check item, and Quit. Windows that have reset
    show 0 percent until the next update. Below the meters, a "Sessions (n)"
-   section lists every Claude Code session whose status line rendered in
-   the last three minutes: `cartagenum  ⛁ 61% · cache 12m`, the
+   section lists every running Claude Code session:
+   `cartagenum  ⛁ 61% · cache 12m`, the
    session's name (or its directory), its context window, and how long
    its prompt cache stays warm. The countdown runs on the tray's clock. The
    hook writes one small file per session under
-   `~/.local/state/ai-usage-meter/sessions/`; files older than a day are
-   removed. Unticking the check item leaves
+   `~/.local/state/ai-usage-meter/sessions/`, recording the Claude Code
+   process that spawned it; a session leaves the list the moment that
+   process exits (within the tray's 30-second tick). If the hook could not
+   identify the process, the session stays listed for three minutes after
+   its last render. Files of gone sessions are removed. Unticking the check item leaves
    only the icon in the top bar; the choice is kept in
    `~/.config/ai-usage-meter/tray.json` (or `$XDG_CONFIG_HOME`).
 

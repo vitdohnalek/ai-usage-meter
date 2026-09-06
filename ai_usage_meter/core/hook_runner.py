@@ -24,7 +24,7 @@ def run(data: bytes, store: SnapshotStore, now: Optional[datetime] = None, color
             )
         except Exception:
             pass
-    record = sessions.from_payload(payload, now)
+    record = sessions.from_payload(payload, now, owner=sessions.find_owner())
     if record is not None:
         try:
             sessions.SessionStore.for_snapshot(store.path).write(record)

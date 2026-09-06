@@ -28,8 +28,10 @@ additive; the hook never blocks or writes stderr.
   throwaway `claude -p` for the `get_usage` control request and merges the
   per-model window (`core/usage_probe.py`); both writers share the flock.
   Sessions: the hook also writes `sessions/<id>.json` beside the snapshot
-  (`core/sessions.py`, one writer per file, no lock); the tray lists the
-  ones updated in the last 3 min and prunes after a day.
+  (`core/sessions.py`, one writer per file, no lock) with the pid and
+  start time of the `claude` process found up the parent chain; the tray
+  lists a session while that process exists (3-min age fallback when the
+  pid is unknown) and prunes gone files.
 - Package: `ai_usage_meter/core` holds every rule and is stdlib only;
   `hook.py` and `tray/app.py` are thin shells; `tray/label.py` holds the
   tray's pure label rules. Test with `make test` (unittest, no packages),

@@ -34,8 +34,10 @@
   the third number equals "Current week (Fable)".
 - `ls ~/.local/state/ai-usage-meter/sessions/` shows one JSON file per
   session that rendered lately; the dropdown's "Sessions (n)" section
-  lists them with context and cache countdown and disappears three minutes
-  after the last one goes quiet.
+  lists them with context and cache countdown; a session drops out on the
+  tray tick after its `claude` process exits (each file carries
+  `owner_pid`/`owner_start`; without them, three minutes after the last
+  render).
 - The dropdown's "Show numbers in top bar" item is ticked and
   `~/.config/ai-usage-meter/tray.json` holds `{"show_numbers": true}` after
   the first toggle.
