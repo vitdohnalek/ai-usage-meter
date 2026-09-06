@@ -1,10 +1,15 @@
 """What the AppIndicator shows, as pure functions over the display state.
 GNOME tray labels are plain text, so bold becomes a ``!`` marker and the
 90 percent flip becomes an icon swap."""
+from datetime import datetime
 from pathlib import Path
 from typing import List, Tuple
 
-from ..core.display import SEPARATOR, MeterDisplay, WindowDisplay
+from ..core import countdown
+from ..core.clamp import clamped_int
+from ..core.display import SEPARATOR, UNKNOWN, MeterDisplay, WindowDisplay
+from ..core.line import CONTEXT_GLYPH, compact_tokens
+from ..core.sessions import SessionRecord
 
 ICON_DIR = Path(__file__).resolve().parent.parent / "assets"
 NORMAL_ICON = "ai-usage-meter-symbolic"
@@ -44,3 +49,38 @@ def bar_text(fraction: float) -> str:
 
 def menu_rows(display: MeterDisplay) -> List[Tuple[str, str]]:
     return [(w.row_text, bar_text(w.fraction)) for w in display.windows]
+
+
+def session_header(records: List[SessionRecord]) -> str:
+    return f"Sessions ({len(records)})"
+
+
+def _session_context(record: SessionRecord) -> str:
+    percent = clamped_int(record.context_used_percentage) if record.context_used_percentage is not None else None
+    text = f"{CONTEXT_GLYPH} {UNKNOWN if percent is None else f'{percent}%'}"
+    used = compact_tokens(record.context_tokens)
+    size = compact_tokens(record.context_window_size)
+    if used and size:
+        text += f" ({used}/{size})"
+    elif used:
+        text += f" ({used})"
+    return text
+
+
+def _session_cache(record: SessionRecord, now: datetime) -> str:
+    if record.cache_warm is None:
+        return ""
+    remaining = countdown.text(record.cache_expires_at, now) if record.cache_warm and record.cache_expires_at else None
+    if remaining:
+        return f"{SEPARATOR}cache {remaining}"
+    if record.cache_warm and record.cache_expires_at is None:
+        return f"{SEPARATOR}cache warm"
+    return f"{SEPARATOR}cache cold"
+
+
+def session_rows(records: List[SessionRecord], now: datetime) -> List[str]:
+    """One inert row per live session, alphabetical: name, context, cache.
+    The cache countdown runs on the tray's clock, so it ticks between hook
+    runs."""
+    ordered = sorted(records, key=lambda r: (r.name.lower(), r.session_id))
+    return [f"{r.name}  {_session_context(r)}{_session_cache(r, now)}" for r in ordered]

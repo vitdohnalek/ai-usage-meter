@@ -42,13 +42,20 @@ itself for the per-model window, and the tray reads that file.
    red-on-white alarm icon. Clicking the item opens a menu with one row per
    window, a ten-cell bar, the countdown to reset, the snapshot age, a
    "Show numbers in top bar" check item, and Quit. Windows that have reset
-   show 0 percent until the next update. Unticking the check item leaves
+   show 0 percent until the next update. Below the meters, a "Sessions (n)"
+   section lists every Claude Code session whose status line rendered in
+   the last three minutes: `cartagenum  ⛁ 61% (610k/1M) · cache 12m`, the
+   session's name (or its directory), its context window, and how long
+   its prompt cache stays warm. The countdown runs on the tray's clock. The
+   hook writes one small file per session under
+   `~/.local/state/ai-usage-meter/sessions/`; files older than a day are
+   removed. Unticking the check item leaves
    only the icon in the top bar; the choice is kept in
    `~/.config/ai-usage-meter/tray.json` (or `$XDG_CONFIG_HOME`).
 
 The snapshot format is provider-keyed JSON; the optional `seven_day_model`
 key is ignored by readers that do not know it, so other readers of the file
-stay compatible.
+stay compatible. Session files live beside it and never touch the snapshot.
 
 Environment knobs for the tray: `AI_USAGE_METER_CLAUDE` (path to the
 `claude` binary when it is not on PATH) and `AI_USAGE_METER_MODEL` (pick a

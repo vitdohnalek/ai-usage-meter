@@ -91,3 +91,13 @@ class StatuslinePayloadTests(unittest.TestCase):
         self.assertIsNone(odd.exceeds_200k)
         self.assertIsNone(odd.prompt_cache.warm)
         self.assertIsNone(odd.prompt_cache.expires_at)
+
+    def test_decodes_session_identity(self):
+        payload = StatuslinePayload.decode(SAMPLE_PAYLOAD_JSON)
+        self.assertEqual(payload.session_id, "f9d550b8-b03e-47b2-aa24-76d4af4f8a26")
+        self.assertIsNone(payload.session_name)
+        self.assertEqual(payload.project_dir, "/home/vitek/Desktop/cartagenum/ai-usage-meter")
+        payload = StatuslinePayload.decode(b'{"session_name":"x","workspace":{"project_dir":"/p"},"cwd":"/c"}')
+        self.assertEqual((payload.session_id, payload.session_name, payload.project_dir), (None, "x", "/p"))
+        payload = StatuslinePayload.decode(b'{"session_id":7,"workspace":"no","cwd":"/c"}')
+        self.assertEqual((payload.session_id, payload.project_dir), (None, "/c"))

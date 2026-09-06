@@ -74,3 +74,12 @@ class HookRunnerTests(unittest.TestCase):
         self.assertEqual(snapshot.claude.five_hour, UsageWindow(21, FIVE_RESET))
         self.assertEqual(snapshot.claude.seven_day_model,
                          ModelWindow(7, MODEL_RESET.replace(microsecond=0), "Fable"))  # stored as whole seconds
+
+    def test_writes_the_session_record_next_to_the_snapshot(self):
+        from ai_usage_meter.core import sessions
+        run(SAMPLE_PAYLOAD_JSON, self.store, CAPTURED)
+        live = sessions.SessionStore.for_snapshot(self.store.path).live(CAPTURED)
+        self.assertEqual([r.name for r in live], ["ai-usage-meter"])
+        self.assertEqual(live[0].context_used_percentage, 12)
+        run(b'{"context_window":{"used_percentage":5}}', self.store, CAPTURED)
+        self.assertEqual(len(sessions.SessionStore.for_snapshot(self.store.path).live(CAPTURED)), 1)

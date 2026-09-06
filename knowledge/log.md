@@ -89,3 +89,8 @@
 - source: user feedback (the cache countdown must tick by default)
 - pages touched: decisions/2026-09-06_terminal-line-segments.md (amended), entities/runbooks/install_and_wire.md
 - notes: Makefile snippet target prints "refreshInterval": 60; applied to the host settings.json with a backup
+
+## [2026-09-06] ingest | Session overview in the tray
+- source: user request (per-session context and cache time left); statusline docs field table (S1)
+- pages touched: decisions/2026-09-06_session-files-beside-the-snapshot.md (new), entities/runbooks/install_and_wire.md, index.md (catalog, Now block)
+- notes: core/sessions.py (record, store, liveness 180 s, prune 1 d); hook writes the record after the merge; tray shows up to 8 rows under "Sessions (n)"; 134 tests

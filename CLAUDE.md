@@ -27,6 +27,9 @@ additive; the hook never blocks or writes stderr.
   app, polling every 30 s. Second writer: every 5 min the tray asks a
   throwaway `claude -p` for the `get_usage` control request and merges the
   per-model window (`core/usage_probe.py`); both writers share the flock.
+  Sessions: the hook also writes `sessions/<id>.json` beside the snapshot
+  (`core/sessions.py`, one writer per file, no lock); the tray lists the
+  ones updated in the last 3 min and prunes after a day.
 - Package: `ai_usage_meter/core` holds every rule and is stdlib only;
   `hook.py` and `tray/app.py` are thin shells; `tray/label.py` holds the
   tray's pure label rules. Test with `make test` (unittest, no packages),

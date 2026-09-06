@@ -88,6 +88,9 @@ class StatuslinePayload:
     context_window_size: Optional[float] = None  # context_window_size for the current model
     exceeds_200k: Optional[bool] = None          # exceeds_200k_tokens: long-context pricing applies
     prompt_cache: Optional[PromptCache] = None
+    session_id: Optional[str] = None
+    session_name: Optional[str] = None           # --name / /rename, else the AI-generated name, else absent
+    project_dir: Optional[str] = None            # workspace.project_dir, falling back to cwd
 
     @classmethod
     def decode(cls, data: bytes) -> "StatuslinePayload":
@@ -101,6 +104,8 @@ class StatuslinePayload:
         model = document.get("model")
         effort = document.get("effort")
         context = document.get("context_window")
+        workspace = document.get("workspace")
+        project_dir = _string(workspace.get("project_dir")) if isinstance(workspace, dict) else None
         return cls(
             model_display_name=_string(model.get("display_name")) if isinstance(model, dict) else None,
             effort_level=_string(effort.get("level")) if isinstance(effort, dict) else None,
@@ -110,6 +115,9 @@ class StatuslinePayload:
             context_window_size=_number(context.get("context_window_size")) if isinstance(context, dict) else None,
             exceeds_200k=_boolean(document.get("exceeds_200k_tokens")),
             prompt_cache=PromptCache.from_json(document.get("prompt_cache")),
+            session_id=_string(document.get("session_id")) or None,
+            session_name=_string(document.get("session_name")),
+            project_dir=project_dir or _string(document.get("cwd")),
         )
 
     def provider_usage(self, captured_at: datetime) -> Optional[ProviderUsage]:

@@ -32,6 +32,10 @@
   exists.
 - The 7-day number equals the `/usage` row "Current week (all models)";
   the third number equals "Current week (Fable)".
+- `ls ~/.local/state/ai-usage-meter/sessions/` shows one JSON file per
+  session that rendered lately; the dropdown's "Sessions (n)" section
+  lists them with context and cache countdown and disappears three minutes
+  after the last one goes quiet.
 - The dropdown's "Show numbers in top bar" item is ticked and
   `~/.config/ai-usage-meter/tray.json` holds `{"show_numbers": true}` after
   the first toggle.

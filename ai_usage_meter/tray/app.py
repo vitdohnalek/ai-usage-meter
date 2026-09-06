@@ -18,7 +18,7 @@ gi.require_version("AppIndicator3", "0.1")
 from gi.repository import AppIndicator3, GLib, Gtk  # noqa: E402
 
 from ai_usage_meter.core import display as display_rules  # noqa: E402
-from ai_usage_meter.core import merge, usage_probe  # noqa: E402
+from ai_usage_meter.core import merge, sessions, usage_probe  # noqa: E402
 from ai_usage_meter.core.snapshot import CLAUDE_PROVIDER_ID  # noqa: E402
 from ai_usage_meter.core.store import SnapshotStore  # noqa: E402
 from ai_usage_meter.tray import label, prefs  # noqa: E402
@@ -28,6 +28,7 @@ INDICATOR_ID = "ai-usage-meter"
 REFRESH_SECONDS = 30
 PROBE_SECONDS = 300
 ROW_SLOTS = 3
+SESSION_SLOTS = 8
 SHOW_NUMBERS_TEXT = "Show numbers in top bar"
 
 
@@ -35,10 +36,12 @@ class MeterTray(Gtk.Application):
     def __init__(self, store=None, prefs_path=None):
         super().__init__(application_id=APPLICATION_ID)
         self.store = store or SnapshotStore.default()
+        self.sessions = sessions.SessionStore.for_snapshot(self.store.path)
         self.prefs_path = prefs_path or prefs.default_path()
         self.prefs = prefs.load(self.prefs_path)
         self.indicator = None
         self.rows = []
+        self.session_items = []
         self.probe_thread = None
 
     def do_activate(self):
@@ -65,6 +68,16 @@ class MeterTray(Gtk.Application):
             self.rows.append((row, bar))
             menu.append(row)
             menu.append(bar)
+        self.session_separator = Gtk.SeparatorMenuItem()
+        menu.append(self.session_separator)
+        self.session_header = Gtk.MenuItem(label="")
+        self.session_header.set_sensitive(False)
+        menu.append(self.session_header)
+        for _ in range(SESSION_SLOTS):
+            item = Gtk.MenuItem(label="")
+            item.set_sensitive(False)
+            self.session_items.append(item)
+            menu.append(item)
         menu.append(Gtk.SeparatorMenuItem())
         self.age_item = Gtk.MenuItem(label="")
         self.age_item.set_sensitive(False)
@@ -81,7 +94,8 @@ class MeterTray(Gtk.Application):
         return menu
 
     def refresh(self):
-        state = display_rules.make(self.store.read(), datetime.now(timezone.utc))
+        now = datetime.now(timezone.utc)
+        state = display_rules.make(self.store.read(), now)
         self.indicator.set_icon_full(label.icon_name(state), "AI usage")
         show = self.prefs.show_numbers
         self.indicator.set_label(label.label_text(state, show), label.label_guide(show))
@@ -96,7 +110,32 @@ class MeterTray(Gtk.Application):
                 row.hide()
                 bar.hide()
         self.age_item.set_label(state.age_text)
+        self._refresh_sessions(now)
         return True
+
+    def _refresh_sessions(self, now):
+        """List the sessions whose hook ran lately; the section vanishes
+        when there are none. Old files are pruned on the same pass."""
+        try:
+            self.sessions.prune(now)
+            live = self.sessions.live(now)
+        except Exception:
+            live = []
+        texts = label.session_rows(live, now)
+        widgets = [self.session_separator, self.session_header] + self.session_items
+        if not texts:
+            for widget in widgets:
+                widget.hide()
+            return
+        self.session_header.set_label(label.session_header(live))
+        self.session_separator.show()
+        self.session_header.show()
+        for index, item in enumerate(self.session_items):
+            if index < len(texts):
+                item.set_label(texts[index])
+                item.show()
+            else:
+                item.hide()
 
     def _on_numbers_toggled(self, item):
         """Persist the choice, then re-render; turning the numbers off and

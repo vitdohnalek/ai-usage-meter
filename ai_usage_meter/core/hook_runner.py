@@ -4,7 +4,7 @@ must cost nothing but a missing update."""
 from datetime import datetime, timezone
 from typing import Optional
 
-from . import line, merge
+from . import line, merge, sessions
 from .payload import StatuslinePayload
 from .snapshot import CLAUDE_PROVIDER_ID
 from .store import SnapshotStore
@@ -22,6 +22,12 @@ def run(data: bytes, store: SnapshotStore, now: Optional[datetime] = None, color
             store.with_exclusive_lock(
                 lambda: store.write(merge.merge_snapshot(store.read(), CLAUDE_PROVIDER_ID, incoming))
             )
+        except Exception:
+            pass
+    record = sessions.from_payload(payload, now)
+    if record is not None:
+        try:
+            sessions.SessionStore.for_snapshot(store.path).write(record)
         except Exception:
             pass
     return line.render(payload, now, color, model_window=_stored_model_window(store))

@@ -69,3 +69,21 @@ class LabelTests(unittest.TestCase):
         self.assertEqual(label.label_guide(True), label.LABEL_GUIDE)
         self.assertEqual(label.label_guide(False), "")
         self.assertEqual(label.icon_name(d), label.NORMAL_ICON)
+
+    def test_session_rows(self):
+        from ai_usage_meter.core import sessions
+        cache_at = NOW + timedelta(minutes=12, seconds=30)
+        records = [
+            sessions.SessionRecord("b", "harness", "/h", "Opus 4.8", 61, 610000, 1000000, True, cache_at, NOW),
+            sessions.SessionRecord("a", "cartagenum", "/c", "Fable 5.1", 12, 118695, 1000000, False, None, NOW),
+            sessions.SessionRecord("c", "zed", "/z", None, None, None, None, None, None, NOW),
+            sessions.SessionRecord("d", "old cache", "/o", None, 3, None, None, True, NOW - timedelta(seconds=1), NOW),
+        ]
+        self.assertEqual(label.session_rows(records, NOW), [
+            "cartagenum  ⛁ 12% (119k/1M) · cache cold",
+            "harness  ⛁ 61% (610k/1M) · cache 12m",
+            "old cache  ⛁ 3% · cache cold",
+            "zed  ⛁ --",
+        ])
+        self.assertEqual(label.session_header(records), "Sessions (4)")
+        self.assertEqual(label.session_rows([], NOW), [])

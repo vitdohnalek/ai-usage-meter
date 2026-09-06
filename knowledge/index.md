@@ -3,7 +3,7 @@
 <!-- Generated 2026-09-05 during the founding grill session -->
 
 ## Now
-- Phase: Linux port on main (120 tests, Python + AppIndicator): three tray meters (Fable week via a `get_usage` probe), a "Show numbers in top bar" toggle, and a terminal line with limits, cache countdown and colour (as of 2026-09-06)
+- Phase: Linux port on main (134 tests, Python + AppIndicator, tagged per merge since v0.2.0): three tray meters (Fable week via a `get_usage` probe), a numbers toggle, a session overview in the dropdown, and a terminal line with limits, Fable week, cache countdown and colour (as of 2026-09-06)
 - Active: first real-world use of the three-number tray; the label vanished from the panel once while the item still exported it (appindicator extension quirk, root cause open); watch whether the toggle repairs it and whether the probe keeps answering (as of 2026-09-06)
 - Next: polish pass (hook cold start ~120 ms, icon rendering check, optional systemd unit, probe interval tuning) (as of 2026-09-06)
 - Deferred: Windows-side WSL tray reading the snapshot over \wsl$; threshold notifications; Codex as a second provider (as of 2026-09-06)
@@ -24,6 +24,7 @@
 - [gaps_and_leads.md](synthesis/gaps_and_leads.md) -- open questions and leads
 
 ## Decisions
+- [2026-09-06_session-files-beside-the-snapshot.md](decisions/2026-09-06_session-files-beside-the-snapshot.md) -- session overview: the hook writes one file per session, the tray lists those updated within 3 min with context and cache countdown
 - [2026-09-06_terminal-line-segments.md](decisions/2026-09-06_terminal-line-segments.md) -- the terminal line adds the two limits, the per-model week from the snapshot, the prompt-cache countdown and ANSI colour; NO_COLOR honoured in the hook shell
 - [2026-09-06_fable-window-via-get-usage.md](decisions/2026-09-06_fable-window-via-get-usage.md) -- third meter: the tray asks a throwaway `claude -p` for `get_usage` every 5 min and stores `seven_day_model`; amends the data-source decision's out-of-scope clause
 - [2026-09-06_linux-port-python-appindicator.md](decisions/2026-09-06_linux-port-python-appindicator.md) -- Linux-only port in Python + PyGObject, AppIndicator tray, 30 s poll; supersedes the upstream host decisions
