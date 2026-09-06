@@ -44,3 +44,13 @@ USAGE_ERROR_JSONL = b"""{"type":"control_response","response":{"subtype":"error"
 
 USAGE_NO_MODEL_JSONL = b"""{"type":"control_response","response":{"subtype":"success","request_id":"ai-usage-meter","response":{"rate_limits_available":false,"rate_limits":null}}}
 """
+
+# A payload with the prompt-cache block (2.1.251+) and the 200k flag set.
+CACHE_PAYLOAD_JSON = b"""
+{"model":{"display_name":"Fable 5.1"},
+ "context_window":{"used_percentage":23,"total_input_tokens":230100,"context_window_size":1000000},
+ "exceeds_200k_tokens":true,
+ "rate_limits":{"five_hour":{"used_percentage":78,"resets_at":1788617400},
+                "seven_day":{"used_percentage":91,"resets_at":1789160400}},
+ "prompt_cache":{"warm":true,"caching_observed":true,"ttl":"1h","expires_at":1788611472}}
+"""

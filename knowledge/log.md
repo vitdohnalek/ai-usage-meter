@@ -74,3 +74,8 @@
 - source: user report (numbers missing from the panel while the dropdown had them); D-Bus check showed XAyatanaLabel still exported; gnome-shell-extension-appindicator indicatorStatusIcon.js _updateLabel read
 - pages touched: decisions/2026-09-06_tray-label-marker-and-icon-swap.md (amended), entities/runbooks/install_and_wire.md (check, trap 5), synthesis/gaps_and_leads.md (lead), index.md (Now block)
 - notes: tray/prefs.py stores {"show_numbers"} under $XDG_CONFIG_HOME/ai-usage-meter/tray.json; Gtk.CheckMenuItem in the dropdown; empty label when off; 115 tests
+
+## [2026-09-06] ingest | Terminal line: limits, cache countdown, colour
+- source: statusline docs field table (S1, re-read 2026-09-06: prompt_cache block, exceeds_200k_tokens, ANSI support)
+- pages touched: decisions/2026-09-06_terminal-line-segments.md (new), entities/runbooks/install_and_wire.md (check), index.md (catalog, Now block)
+- notes: payload gains PromptCache and exceeds_200k; line.render(payload, now, color); hook.py decides colour from NO_COLOR; 120 tests

@@ -14,7 +14,7 @@ def main() -> int:
     try:
         from ai_usage_meter.core.hook_runner import run
         from ai_usage_meter.core.store import SnapshotStore
-        output = run(sys.stdin.buffer.read(), SnapshotStore.default())
+        output = run(sys.stdin.buffer.read(), SnapshotStore.default(), color="NO_COLOR" not in os.environ)
     except BaseException:
         pass
     try:

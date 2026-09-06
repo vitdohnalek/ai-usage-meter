@@ -3,7 +3,7 @@ import unittest
 from ai_usage_meter.core.payload import StatuslinePayload
 from ai_usage_meter.core.snapshot import UsageWindow
 from tests.fixtures import (
-    CAPTURED, FIVE_RESET, NO_RATE_LIMITS_JSON, ONLY_FIVE_HOUR_JSON, SAMPLE_PAYLOAD_JSON,
+    CACHE_PAYLOAD_JSON, CAPTURED, FIVE_RESET, NO_RATE_LIMITS_JSON, ONLY_FIVE_HOUR_JSON, SAMPLE_PAYLOAD_JSON,
 )
 
 
@@ -77,3 +77,17 @@ class StatuslinePayloadTests(unittest.TestCase):
         self.assertIsNone(payload.context_used_percentage)
         self.assertIsNone(payload.rate_limits.five_hour)
         self.assertEqual(payload.rate_limits.seven_day.used_percentage, 4)
+
+    def test_decodes_cache_and_200k_flag(self):
+        payload = StatuslinePayload.decode(CACHE_PAYLOAD_JSON)
+        self.assertTrue(payload.exceeds_200k)
+        self.assertTrue(payload.prompt_cache.warm)
+        self.assertTrue(payload.prompt_cache.observed)
+        self.assertEqual(payload.prompt_cache.expires_at, 1_788_611_472)
+        sample = StatuslinePayload.decode(SAMPLE_PAYLOAD_JSON)
+        self.assertFalse(sample.exceeds_200k)
+        self.assertIsNone(sample.prompt_cache)
+        odd = StatuslinePayload.decode(b'{"exceeds_200k_tokens":"true","prompt_cache":{"warm":1,"caching_observed":true,"expires_at":"soon"}}')
+        self.assertIsNone(odd.exceeds_200k)
+        self.assertIsNone(odd.prompt_cache.warm)
+        self.assertIsNone(odd.prompt_cache.expires_at)

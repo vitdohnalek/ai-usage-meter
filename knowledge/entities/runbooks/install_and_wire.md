@@ -23,8 +23,9 @@
 - `cat ~/.local/state/ai-usage-meter/snapshot.json` shows
   `providers.claude` with three windows and ISO-8601 dates; `source` is
   `statusline` or `usage` depending on the last writer.
-- The terminal status bar shows `<model> · <effort> · ⛁ <n>%`; the tray
-  follows within 30 seconds.
+- The terminal status bar shows `<model> · <effort> · ⛁ <n>% (<tokens>) ·
+  5h <n>% · wk <n>%` (plus `cache <countdown>` once a turn has run); the
+  tray follows within 30 seconds.
 - `pgrep -af ai-usage-meter-tray` shows one process; the autostart file
   exists.
 - The 7-day number equals the `/usage` row "Current week (all models)";

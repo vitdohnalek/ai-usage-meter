@@ -22,6 +22,10 @@ def _string(value) -> Optional[str]:
     return value if isinstance(value, str) else None
 
 
+def _boolean(value) -> Optional[bool]:
+    return value if isinstance(value, bool) else None
+
+
 @dataclass
 class RateWindow:
     used_percentage: Optional[float]
@@ -59,6 +63,22 @@ class RateLimits:
 
 
 @dataclass
+class PromptCache:
+    """``prompt_cache`` (2.1.251+): whether the cached prefix is still live
+    and when it goes cold, in epoch seconds like ``resets_at``."""
+    warm: Optional[bool]
+    observed: Optional[bool]
+    expires_at: Optional[float]
+
+    @classmethod
+    def from_json(cls, raw) -> Optional["PromptCache"]:
+        if not isinstance(raw, dict):
+            return None
+        return cls(_boolean(raw.get("warm")), _boolean(raw.get("caching_observed")),
+                   _number(raw.get("expires_at")))
+
+
+@dataclass
 class StatuslinePayload:
     model_display_name: Optional[str]
     effort_level: Optional[str]
@@ -66,6 +86,8 @@ class StatuslinePayload:
     rate_limits: Optional[RateLimits]
     context_tokens: Optional[float] = None       # total_input_tokens: what is in the window now
     context_window_size: Optional[float] = None  # context_window_size for the current model
+    exceeds_200k: Optional[bool] = None          # exceeds_200k_tokens: long-context pricing applies
+    prompt_cache: Optional[PromptCache] = None
 
     @classmethod
     def decode(cls, data: bytes) -> "StatuslinePayload":
@@ -86,6 +108,8 @@ class StatuslinePayload:
             rate_limits=RateLimits.from_json(document.get("rate_limits")),
             context_tokens=_number(context.get("total_input_tokens")) if isinstance(context, dict) else None,
             context_window_size=_number(context.get("context_window_size")) if isinstance(context, dict) else None,
+            exceeds_200k=_boolean(document.get("exceeds_200k_tokens")),
+            prompt_cache=PromptCache.from_json(document.get("prompt_cache")),
         )
 
     def provider_usage(self, captured_at: datetime) -> Optional[ProviderUsage]:

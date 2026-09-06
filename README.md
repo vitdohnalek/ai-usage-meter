@@ -12,10 +12,19 @@ itself for the per-model window, and the tray reads that file.
 2. The hook merges the `rate_limits` block into
    `~/.local/state/ai-usage-meter/snapshot.json` (or `$XDG_STATE_HOME`)
    and prints one line back to the terminal:
-   `Fable 5.1 · high · ⛁ 12% (119k/1M)`. Effort is omitted when Claude
-   Code does not send one; the cylinder is the U+26C1 symbol /context uses
-   for the context window, followed by the percentage used and the token
-   count over the model's window size.
+   `Fable 5.1 · high · ⛁ 12% (119k/1M) · 5h 21% · wk 4% · cache 43m`.
+   Effort is omitted when Claude Code does not send one; the cylinder is
+   the U+26C1 symbol /context uses for the context window, followed by the
+   percentage used and the token count over the model's window size. The
+   percentage is green under 50, yellow under 75, red from 75; the token
+   count turns red once the conversation passes the 200k long-context
+   boundary. `5h` and `wk` are the 5-hour and 7-day limits (yellow at 75,
+   red at 90, the tray's thresholds), useful where there is no tray. `cache`
+   is the prompt cache: a countdown while the cached prefix is warm, `cache
+   cold` when the next turn re-bills the whole context. The line only
+   re-renders after a turn, so add `"refreshInterval": 60` to the
+   `statusLine` object if you want the countdown to tick while idle. Set
+   `NO_COLOR` in the environment to get plain text.
 3. Every 5 minutes the tray runs a throwaway `claude -p` process and sends
    it the SDK control request `get_usage`; Claude Code answers with the
    per-model weekly bucket that `/usage` shows as "Current week (Fable)"

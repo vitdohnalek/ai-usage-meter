@@ -3,7 +3,7 @@
 <!-- Generated 2026-09-05 during the founding grill session -->
 
 ## Now
-- Phase: Linux port on main (115 tests, Python + AppIndicator) with a third meter, the Fable weekly window, fed by a `get_usage` probe from the tray, and a "Show numbers in top bar" toggle in the dropdown (as of 2026-09-06)
+- Phase: Linux port on main (120 tests, Python + AppIndicator): three tray meters (Fable week via a `get_usage` probe), a "Show numbers in top bar" toggle, and a terminal line with limits, cache countdown and colour (as of 2026-09-06)
 - Active: first real-world use of the three-number tray; the label vanished from the panel once while the item still exported it (appindicator extension quirk, root cause open); watch whether the toggle repairs it and whether the probe keeps answering (as of 2026-09-06)
 - Next: polish pass (hook cold start ~120 ms, icon rendering check, optional systemd unit, probe interval tuning) (as of 2026-09-06)
 - Deferred: Windows-side WSL tray reading the snapshot over \wsl$; threshold notifications; Codex as a second provider (as of 2026-09-06)
@@ -24,6 +24,7 @@
 - [gaps_and_leads.md](synthesis/gaps_and_leads.md) -- open questions and leads
 
 ## Decisions
+- [2026-09-06_terminal-line-segments.md](decisions/2026-09-06_terminal-line-segments.md) -- the terminal line adds the two limits, the prompt-cache countdown and ANSI colour; NO_COLOR honoured in the hook shell
 - [2026-09-06_fable-window-via-get-usage.md](decisions/2026-09-06_fable-window-via-get-usage.md) -- third meter: the tray asks a throwaway `claude -p` for `get_usage` every 5 min and stores `seven_day_model`; amends the data-source decision's out-of-scope clause
 - [2026-09-06_linux-port-python-appindicator.md](decisions/2026-09-06_linux-port-python-appindicator.md) -- Linux-only port in Python + PyGObject, AppIndicator tray, 30 s poll; supersedes the upstream host decisions
 - [2026-09-06_snapshot-in-xdg-state-home.md](decisions/2026-09-06_snapshot-in-xdg-state-home.md) -- snapshot at $XDG_STATE_HOME/ai-usage-meter, on ext4 for a future WSL reader; amends the snapshot contract's path clause

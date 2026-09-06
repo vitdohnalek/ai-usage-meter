@@ -17,7 +17,7 @@ class HookCliTests(unittest.TestCase):
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory(prefix="ai-usage-meter-cli-")
         self.addCleanup(self.tmp.cleanup)
-        self.env = {**os.environ, "XDG_STATE_HOME": self.tmp.name, "PYTHONPATH": str(REPO)}
+        self.env = {**os.environ, "XDG_STATE_HOME": self.tmp.name, "PYTHONPATH": str(REPO), "NO_COLOR": "1"}
 
     def run_hook(self, stdin: bytes):
         return subprocess.run([sys.executable, str(HOOK)], input=stdin, env=self.env,
@@ -27,12 +27,20 @@ class HookCliTests(unittest.TestCase):
         result = self.run_hook(SAMPLE_PAYLOAD_JSON)
         self.assertEqual(result.returncode, 0)
         self.assertEqual(result.stderr, b"")
-        self.assertEqual(result.stdout.decode("utf-8"), "Fable 5.1 · high · ⛁ 12% (119k/1M)\n")
+        self.assertEqual(result.stdout.decode("utf-8"), "Fable 5.1 · high · ⛁ 12% (119k/1M) · 5h 21% · wk 4%\n")
         path = Path(self.tmp.name) / "ai-usage-meter" / "snapshot.json"
         document = json.loads(path.read_text())
         self.assertEqual(document["schema_version"], 1)
         self.assertEqual(document["providers"]["claude"]["five_hour"]["used_percentage"], 21)
         self.assertEqual(document["providers"]["claude"]["five_hour"]["resets_at"], "2026-09-05T14:10:00Z")
+
+    def test_colours_unless_no_color_is_set(self):
+        del self.env["NO_COLOR"]
+        result = self.run_hook(SAMPLE_PAYLOAD_JSON)
+        self.assertEqual(result.returncode, 0)
+        self.assertEqual(result.stderr, b"")
+        self.assertIn(b"\x1b[32m12%\x1b[0m", result.stdout)
+        self.assertTrue(result.stdout.endswith(b"wk 4%\n"))
 
     def test_garbage_still_prints_a_line_and_exits_zero(self):
         result = self.run_hook(b"\xff\xfe not json")

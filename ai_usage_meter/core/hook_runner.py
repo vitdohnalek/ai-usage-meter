@@ -10,7 +10,7 @@ from .snapshot import CLAUDE_PROVIDER_ID
 from .store import SnapshotStore
 
 
-def run(data: bytes, store: SnapshotStore, now: Optional[datetime] = None) -> str:
+def run(data: bytes, store: SnapshotStore, now: Optional[datetime] = None, color: bool = False) -> str:
     now = now or datetime.now(timezone.utc)
     try:
         payload = StatuslinePayload.decode(data)
@@ -24,4 +24,4 @@ def run(data: bytes, store: SnapshotStore, now: Optional[datetime] = None) -> st
             )
         except Exception:
             pass
-    return line.render(payload)
+    return line.render(payload, now, color)
