@@ -4,7 +4,7 @@ from datetime import timedelta
 from pathlib import Path
 
 from ai_usage_meter.core.hook_runner import run
-from ai_usage_meter.core.snapshot import UsageWindow
+from ai_usage_meter.core.snapshot import ModelWindow, ProviderUsage, Snapshot, UsageWindow
 from ai_usage_meter.core.store import SnapshotStore
 from tests.fixtures import (
     CAPTURED, FIVE_RESET, NO_RATE_LIMITS_JSON, SAMPLE_PAYLOAD_JSON, SEVEN_RESET,
@@ -63,3 +63,14 @@ class HookRunnerTests(unittest.TestCase):
         data = b'{"effort":{"level":3},"rate_limits":{"five_hour":{"used_percentage":21,"resets_at":1788617400},"seven_day":{"used_percentage":4,"resets_at":1789160400}}}'
         self.assertEqual(run(data, self.store, CAPTURED), "Claude · ⛁ -- · 5h 21% · wk 4%")
         self.assertEqual(self.store.read().claude.five_hour, UsageWindow(21, FIVE_RESET))
+
+    def test_model_window_already_in_the_snapshot_joins_the_line(self):
+        from tests.fixtures import MODEL_RESET
+        self.store.write(Snapshot(schema_version=1, providers={"claude": ProviderUsage(
+            None, None, CAPTURED, "usage", seven_day_model=ModelWindow(7, MODEL_RESET, "Fable"))}))
+        self.assertEqual(run(SAMPLE_PAYLOAD_JSON, self.store, CAPTURED),
+                         "Fable 5.1 · high · ⛁ 12% (119k/1M) · 5h 21% · wk 4% · Fable 7%")
+        snapshot = self.store.read()
+        self.assertEqual(snapshot.claude.five_hour, UsageWindow(21, FIVE_RESET))
+        self.assertEqual(snapshot.claude.seven_day_model,
+                         ModelWindow(7, MODEL_RESET.replace(microsecond=0), "Fable"))  # stored as whole seconds

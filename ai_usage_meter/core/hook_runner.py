@@ -24,4 +24,15 @@ def run(data: bytes, store: SnapshotStore, now: Optional[datetime] = None, color
             )
         except Exception:
             pass
-    return line.render(payload, now, color)
+    return line.render(payload, now, color, model_window=_stored_model_window(store))
+
+
+def _stored_model_window(store: SnapshotStore):
+    """The per-model week the tray's probe last wrote, if any; the hook
+    never asks for it itself."""
+    try:
+        snapshot = store.read()
+        usage = snapshot.claude if snapshot else None
+        return usage.seven_day_model if usage else None
+    except Exception:
+        return None

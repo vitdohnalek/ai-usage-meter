@@ -79,3 +79,8 @@
 - source: statusline docs field table (S1, re-read 2026-09-06: prompt_cache block, exceeds_200k_tokens, ANSI support)
 - pages touched: decisions/2026-09-06_terminal-line-segments.md (new), entities/runbooks/install_and_wire.md (check), index.md (catalog, Now block)
 - notes: payload gains PromptCache and exceeds_200k; line.render(payload, now, color); hook.py decides colour from NO_COLOR; 120 tests
+
+## [2026-09-06] ingest | Terminal line: per-model week from the snapshot
+- source: user request; snapshot already carries seven_day_model from the tray probe
+- pages touched: decisions/2026-09-06_terminal-line-segments.md (amended), entities/runbooks/install_and_wire.md, index.md (catalog)
+- notes: hook_runner reads the stored seven_day_model after the merge and passes it to line.render(model_window=); 122 tests

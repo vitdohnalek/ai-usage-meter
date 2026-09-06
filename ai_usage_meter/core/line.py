@@ -1,13 +1,16 @@
 """The one line the hook prints back to Claude Code's status bar:
-``Fable 5.1 · high · ⛁ 12% (119k/1M) · 5h 21% · wk 4% · cache 43m``."""
+``Fable 5.1 · high · ⛁ 12% (119k/1M) · 5h 21% · wk 4% · Fable 5% · cache 43m``.
+The per-model window is not in the payload; it comes from the snapshot the
+tray's probe maintains, so it is absent where no tray runs."""
 import math
 from datetime import datetime, timezone
 from typing import Optional
 
 from . import countdown
 from .clamp import clamped_int
-from .display import BOLD_THRESHOLD, FLIP_THRESHOLD, SEPARATOR, UNKNOWN
+from .display import BOLD_THRESHOLD, FLIP_THRESHOLD, MODEL_FALLBACK_NAME, SEPARATOR, UNKNOWN
 from .payload import StatuslinePayload
+from .snapshot import ModelWindow
 
 FALLBACK_MODEL = "Claude"
 CONTEXT_GLYPH = "⛁"  # the stacked-cylinder symbol /context uses
@@ -69,13 +72,24 @@ def _context(payload: Optional[StatuslinePayload], color: bool) -> str:
     return f"{CONTEXT_GLYPH} {text}"
 
 
-def _limit(tag: str, window, color: bool) -> Optional[str]:
+def _limit_text(tag: str, percent: int, color: bool) -> str:
     """One rate-limit segment, coloured at the tray's own thresholds."""
-    percent = _percent(window.used_percentage) if window else None
-    if percent is None:
-        return None
     code = RED if percent >= FLIP_THRESHOLD else YELLOW if percent >= BOLD_THRESHOLD else None
     return f"{tag} {_paint(_percent_text(percent), code, color)}"
+
+
+def _limit(tag: str, window, color: bool) -> Optional[str]:
+    percent = _percent(window.used_percentage) if window else None
+    return None if percent is None else _limit_text(tag, percent, color)
+
+
+def _model_limit(window: Optional[ModelWindow], now: datetime, color: bool) -> Optional[str]:
+    """The stored per-model week, named after its label; 0 once its reset
+    has passed and no fresher probe has landed, as the tray shows it."""
+    if window is None:
+        return None
+    percent = window.used_percentage if countdown.text(window.resets_at, now) else 0
+    return _limit_text(window.model or MODEL_FALLBACK_NAME, percent, color)
 
 
 def _limits(payload: Optional[StatuslinePayload], color: bool) -> list:
@@ -106,12 +120,13 @@ def _cache(payload: Optional[StatuslinePayload], now: datetime, color: bool) -> 
     return _paint(f"{CACHE_TAG} cold", YELLOW, color)
 
 
-def render(payload: Optional[StatuslinePayload], now: Optional[datetime] = None, color: bool = False) -> str:
+def render(payload: Optional[StatuslinePayload], now: Optional[datetime] = None, color: bool = False,
+           model_window: Optional[ModelWindow] = None) -> str:
     now = now or datetime.now(timezone.utc)
     model = (payload.model_display_name if payload else None) or FALLBACK_MODEL
     effort = payload.effort_level if payload else None
     segments = [model] + ([effort] if effort else []) + [_context(payload, color)] + _limits(payload, color)
-    cache = _cache(payload, now, color)
-    if cache:
-        segments.append(cache)
+    for extra in (_model_limit(model_window, now, color), _cache(payload, now, color)):
+        if extra:
+            segments.append(extra)
     return SEPARATOR.join(segments).replace("\r", " ").replace("\n", " ")

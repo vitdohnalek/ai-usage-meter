@@ -8,6 +8,10 @@ already there:
 
 - `5h <n>%` and `wk <n>%`, the same two rate-limit windows the tray shows,
   each present only when the payload carries it.
+- `Fable <n>%`, the per-model week, read from the snapshot the tray's
+  probe maintains (`seven_day_model`), never fetched by the hook itself;
+  0 once its reset has passed, as the tray shows it; absent where no tray
+  runs (WSL, servers).
 - `cache <countdown>` from `prompt_cache.expires_at` while
   `prompt_cache.warm` is true; `cache warm` when the expiry is unknown;
   `cache cold` otherwise; nothing when `caching_observed` is false or the

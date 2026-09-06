@@ -24,7 +24,7 @@
 - [gaps_and_leads.md](synthesis/gaps_and_leads.md) -- open questions and leads
 
 ## Decisions
-- [2026-09-06_terminal-line-segments.md](decisions/2026-09-06_terminal-line-segments.md) -- the terminal line adds the two limits, the prompt-cache countdown and ANSI colour; NO_COLOR honoured in the hook shell
+- [2026-09-06_terminal-line-segments.md](decisions/2026-09-06_terminal-line-segments.md) -- the terminal line adds the two limits, the per-model week from the snapshot, the prompt-cache countdown and ANSI colour; NO_COLOR honoured in the hook shell
 - [2026-09-06_fable-window-via-get-usage.md](decisions/2026-09-06_fable-window-via-get-usage.md) -- third meter: the tray asks a throwaway `claude -p` for `get_usage` every 5 min and stores `seven_day_model`; amends the data-source decision's out-of-scope clause
 - [2026-09-06_linux-port-python-appindicator.md](decisions/2026-09-06_linux-port-python-appindicator.md) -- Linux-only port in Python + PyGObject, AppIndicator tray, 30 s poll; supersedes the upstream host decisions
 - [2026-09-06_snapshot-in-xdg-state-home.md](decisions/2026-09-06_snapshot-in-xdg-state-home.md) -- snapshot at $XDG_STATE_HOME/ai-usage-meter, on ext4 for a future WSL reader; amends the snapshot contract's path clause

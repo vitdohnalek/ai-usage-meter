@@ -99,3 +99,19 @@ class StatuslineLineTests(unittest.TestCase):
                          f"Fable 5.1 · high · ⛁ {G}12%{X} (119k/1M) · 5h 21% · wk 4%")
         cold = StatuslinePayload.decode(b'{"prompt_cache":{"warm":false,"caching_observed":true}}')
         self.assertEqual(line.render(cold, color=True), f"Claude · ⛁ -- · {Y}cache cold{X}")
+
+    def test_model_window_from_the_snapshot_is_the_third_limit(self):
+        from ai_usage_meter.core.snapshot import ModelWindow
+        from tests.fixtures import MODEL_RESET
+        payload = StatuslinePayload.decode(CACHE_PAYLOAD_JSON)
+        window = ModelWindow(5, MODEL_RESET, "Fable")
+        self.assertEqual(line.render(payload, CAPTURED, model_window=window),
+                         "Fable 5.1 · ⛁ 23% (230k/1M) · 5h 78% · wk 91% · Fable 5% · cache 43m")
+        self.assertEqual(line.render(None, CAPTURED, model_window=window), "Claude · ⛁ -- · Fable 5%")
+        self.assertEqual(line.render(None, MODEL_RESET + timedelta(seconds=1), model_window=window),
+                         "Claude · ⛁ -- · Fable 0%")
+        self.assertEqual(line.render(None, CAPTURED, model_window=ModelWindow(91, MODEL_RESET, "")),
+                         "Claude · ⛁ -- · Model 91%")
+        self.assertEqual(line.render(None, CAPTURED, color=True, model_window=ModelWindow(91, MODEL_RESET, "Fable")),
+                         f"Claude · ⛁ -- · Fable {line.RED}91%{line.RESET}")
+        self.assertEqual(line.render(None, CAPTURED, model_window=None), "Claude · ⛁ --")
