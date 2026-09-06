@@ -9,6 +9,13 @@ rounded square). The dropdown is a plain `Gtk.Menu`: two inert rows
 (`5-hour  42% · resets in 2h 21m` over a ten-cell `▰▰▰▰▱▱▱▱▱▱` bar), the
 age line, Quit.
 
+Amended 2026-09-06: the dropdown gained a "Show numbers in top bar" check
+item (`tray/prefs.py`, kept in `$XDG_CONFIG_HOME/ai-usage-meter/tray.json`).
+Off, the label is the empty string and the panel keeps the icon alone;
+the thresholds still drive the icon swap, so the 90-percent warning
+survives with the numbers hidden. The toggle doubles as the repair for
+the appindicator extension losing its label widget (runbook trap 5).
+
 ## Why
 AppIndicator labels are plain text (no Pango markup, no bold), and the
 StatusNotifierItem menu protocol transports labels and icons only, so

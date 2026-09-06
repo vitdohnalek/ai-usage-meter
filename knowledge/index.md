@@ -3,8 +3,8 @@
 <!-- Generated 2026-09-05 during the founding grill session -->
 
 ## Now
-- Phase: Linux port on main (108 tests, Python + AppIndicator) with a third meter, the Fable weekly window, fed by a `get_usage` probe from the tray (as of 2026-09-06)
-- Active: first real-world use of the three-number tray; watch whether the `!` marker and alarm icon read well on the GNOME top bar and whether the probe keeps answering (as of 2026-09-06)
+- Phase: Linux port on main (115 tests, Python + AppIndicator) with a third meter, the Fable weekly window, fed by a `get_usage` probe from the tray, and a "Show numbers in top bar" toggle in the dropdown (as of 2026-09-06)
+- Active: first real-world use of the three-number tray; the label vanished from the panel once while the item still exported it (appindicator extension quirk, root cause open); watch whether the toggle repairs it and whether the probe keeps answering (as of 2026-09-06)
 - Next: polish pass (hook cold start ~120 ms, icon rendering check, optional systemd unit, probe interval tuning) (as of 2026-09-06)
 - Deferred: Windows-side WSL tray reading the snapshot over \wsl$; threshold notifications; Codex as a second provider (as of 2026-09-06)
 - Known: decision pages dated 2026-09-05 were inherited from upstream; the ones that only described its implementation live under decisions/upstream/ (as of 2026-09-06)

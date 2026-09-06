@@ -61,3 +61,11 @@ class LabelTests(unittest.TestCase):
         rows = label.menu_rows(display(42, 18, model=5))
         self.assertEqual(len(rows), 3)
         self.assertEqual(rows[2], ("Fable  5% · resets in 1d 07h", "▰▱▱▱▱▱▱▱▱▱"))
+
+    def test_numbers_can_be_hidden_from_the_top_bar(self):
+        d = display(21, 4, model=5)
+        self.assertEqual(label.label_text(d, show_numbers=True), "21% · 4% · 5%")
+        self.assertEqual(label.label_text(d, show_numbers=False), "")
+        self.assertEqual(label.label_guide(True), label.LABEL_GUIDE)
+        self.assertEqual(label.label_guide(False), "")
+        self.assertEqual(label.icon_name(d), label.NORMAL_ICON)

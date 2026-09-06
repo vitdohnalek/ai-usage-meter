@@ -34,6 +34,12 @@
 - A `resets_at` unit change upstream (seconds to milliseconds or ISO) would
   render a clamped huge countdown or drop the window silently. Trigger:
   Claude Code changes the unit; then reject values outside now-1d..now+60d.
+- The GNOME appindicator extension once stopped rendering the label while
+  the item still exported `XAyatanaLabel` (2026-09-06, GNOME 46, extension
+  for shell 45/46). Its `_updateLabel` re-adds a dropped widget only on the
+  next label change, so a toggle off/on repairs it (runbook trap 5). Trigger
+  for a real fix: it recurs at login; then try a one-shot empty-then-set
+  label two seconds after activation.
 
 Related: [data-source decision](../decisions/2026-09-05_data-source-statusline-snapshot.md)
 

@@ -29,6 +29,9 @@
   exists.
 - The 7-day number equals the `/usage` row "Current week (all models)";
   the third number equals "Current week (Fable)".
+- The dropdown's "Show numbers in top bar" item is ticked and
+  `~/.config/ai-usage-meter/tray.json` holds `{"show_numbers": true}` after
+  the first toggle.
 - One-off probe by hand:
   `python3 -c 'from ai_usage_meter.core import usage_probe; print(usage_probe.capture("/tmp/x"))'`
   from the repo root prints a `ProviderUsage` with `seven_day_model` set.
@@ -48,6 +51,12 @@
    packages only.
 4. Never add `--bare` to the probe: it disables OAuth and `get_usage`
    answers `rate_limits_available: false`.
+5. If the icon shows but the numbers do not, the GNOME appindicator
+   extension has dropped its text widget although the item still exports
+   the label (check with `busctl --user get-property <bus name>
+   /org/ayatana/NotificationItem/ai_usage_meter org.kde.StatusNotifierItem
+   XAyatanaLabel`). Untick and re-tick "Show numbers in top bar": the empty
+   label makes the extension destroy the widget, the next one rebuilds it.
 
 Related: [snapshot path](../../decisions/2026-09-06_snapshot-in-xdg-state-home.md)
 

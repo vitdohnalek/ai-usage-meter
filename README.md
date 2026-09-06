@@ -28,8 +28,11 @@ itself for the per-model window, and the tray reads that file.
    appears once the first probe has answered). A number at 75 percent or
    more gets a `!` (`78%! · 4% · 5%`); at 90 percent the glyph swaps to a
    red-on-white alarm icon. Clicking the item opens a menu with one row per
-   window, a ten-cell bar, the countdown to reset, the snapshot age, and
-   Quit. Windows that have reset show 0 percent until the next update.
+   window, a ten-cell bar, the countdown to reset, the snapshot age, a
+   "Show numbers in top bar" check item, and Quit. Windows that have reset
+   show 0 percent until the next update. Unticking the check item leaves
+   only the icon in the top bar; the choice is kept in
+   `~/.config/ai-usage-meter/tray.json` (or `$XDG_CONFIG_HOME`).
 
 The snapshot format is provider-keyed JSON; the optional `seven_day_model`
 key is ignored by readers that do not know it, so other readers of the file

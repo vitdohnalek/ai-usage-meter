@@ -5,6 +5,7 @@ Single-instance through the GtkApplication id."""
 import os
 import sys
 import threading
+from dataclasses import replace
 from datetime import datetime, timezone
 
 if __package__ in (None, ""):
@@ -20,20 +21,22 @@ from ai_usage_meter.core import display as display_rules  # noqa: E402
 from ai_usage_meter.core import merge, usage_probe  # noqa: E402
 from ai_usage_meter.core.snapshot import CLAUDE_PROVIDER_ID  # noqa: E402
 from ai_usage_meter.core.store import SnapshotStore  # noqa: E402
-from ai_usage_meter.tray import label  # noqa: E402
+from ai_usage_meter.tray import label, prefs  # noqa: E402
 
 APPLICATION_ID = "io.github.vitdohnalek.AiUsageMeter"
 INDICATOR_ID = "ai-usage-meter"
 REFRESH_SECONDS = 30
 PROBE_SECONDS = 300
 ROW_SLOTS = 3
-LABEL_GUIDE = "100%! · 100%! · 100%!"
+SHOW_NUMBERS_TEXT = "Show numbers in top bar"
 
 
 class MeterTray(Gtk.Application):
-    def __init__(self, store=None):
+    def __init__(self, store=None, prefs_path=None):
         super().__init__(application_id=APPLICATION_ID)
         self.store = store or SnapshotStore.default()
+        self.prefs_path = prefs_path or prefs.default_path()
+        self.prefs = prefs.load(self.prefs_path)
         self.indicator = None
         self.rows = []
         self.probe_thread = None
@@ -67,6 +70,10 @@ class MeterTray(Gtk.Application):
         self.age_item.set_sensitive(False)
         menu.append(self.age_item)
         menu.append(Gtk.SeparatorMenuItem())
+        self.numbers_item = Gtk.CheckMenuItem(label=SHOW_NUMBERS_TEXT)
+        self.numbers_item.set_active(self.prefs.show_numbers)
+        self.numbers_item.connect("toggled", self._on_numbers_toggled)
+        menu.append(self.numbers_item)
         quit_item = Gtk.MenuItem(label="Quit AI Usage Meter")
         quit_item.connect("activate", lambda _: self.quit())
         menu.append(quit_item)
@@ -76,7 +83,8 @@ class MeterTray(Gtk.Application):
     def refresh(self):
         state = display_rules.make(self.store.read(), datetime.now(timezone.utc))
         self.indicator.set_icon_full(label.icon_name(state), "AI usage")
-        self.indicator.set_label(label.label_text(state), LABEL_GUIDE)
+        show = self.prefs.show_numbers
+        self.indicator.set_label(label.label_text(state, show), label.label_guide(show))
         texts = label.menu_rows(state)
         for index, (row, bar) in enumerate(self.rows):
             if index < len(texts):
@@ -89,6 +97,16 @@ class MeterTray(Gtk.Application):
                 bar.hide()
         self.age_item.set_label(state.age_text)
         return True
+
+    def _on_numbers_toggled(self, item):
+        """Persist the choice, then re-render; turning the numbers off and
+        back on also rebuilds the panel text widget on the GNOME side."""
+        self.prefs = replace(self.prefs, show_numbers=item.get_active())
+        try:
+            prefs.save(self.prefs, self.prefs_path)
+        except OSError:
+            pass
+        self.refresh()
 
     def start_probe(self):
         """Spawn the probe off the GTK thread; skip a tick if one is running."""

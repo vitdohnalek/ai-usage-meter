@@ -13,14 +13,24 @@ BOLD_MARKER = "!"
 BAR_CELLS = 10
 BAR_FULL = "▰"
 BAR_EMPTY = "▱"
+LABEL_GUIDE = "100%! · 100%! · 100%!"
 
 
 def _number(window: WindowDisplay) -> str:
     return window.percent_text + (BOLD_MARKER if window.is_bold else "")
 
 
-def label_text(display: MeterDisplay) -> str:
+def label_text(display: MeterDisplay, show_numbers: bool = True) -> str:
+    """Empty when the user hides the numbers: an empty label makes the
+    appindicator extension drop the text widget, leaving the icon alone."""
+    if not show_numbers:
+        return ""
     return SEPARATOR.join(_number(w) for w in display.windows)
+
+
+def label_guide(show_numbers: bool) -> str:
+    """The widest label the panel should reserve room for."""
+    return LABEL_GUIDE if show_numbers else ""
 
 
 def icon_name(display: MeterDisplay) -> str:
