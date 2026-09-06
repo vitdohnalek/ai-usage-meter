@@ -80,8 +80,8 @@ class LabelTests(unittest.TestCase):
             sessions.SessionRecord("d", "old cache", "/o", None, 3, None, None, True, NOW - timedelta(seconds=1), NOW),
         ]
         self.assertEqual(label.session_rows(records, NOW), [
-            "cartagenum  ⛁ 12% (119k/1M) · cache cold",
-            "harness  ⛁ 61% (610k/1M) · cache 12m",
+            "cartagenum  ⛁ 12% · cache cold",
+            "harness  ⛁ 61% · cache 12m",
             "old cache  ⛁ 3% · cache cold",
             "zed  ⛁ --",
         ])

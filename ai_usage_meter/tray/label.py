@@ -8,7 +8,7 @@ from typing import List, Tuple
 from ..core import countdown
 from ..core.clamp import clamped_int
 from ..core.display import SEPARATOR, UNKNOWN, MeterDisplay, WindowDisplay
-from ..core.line import CONTEXT_GLYPH, compact_tokens
+from ..core.line import CONTEXT_GLYPH
 from ..core.sessions import SessionRecord
 
 ICON_DIR = Path(__file__).resolve().parent.parent / "assets"
@@ -56,15 +56,10 @@ def session_header(records: List[SessionRecord]) -> str:
 
 
 def _session_context(record: SessionRecord) -> str:
+    """Percentage only; the token count stays in the terminal line so the
+    dropdown reads at a glance."""
     percent = clamped_int(record.context_used_percentage) if record.context_used_percentage is not None else None
-    text = f"{CONTEXT_GLYPH} {UNKNOWN if percent is None else f'{percent}%'}"
-    used = compact_tokens(record.context_tokens)
-    size = compact_tokens(record.context_window_size)
-    if used and size:
-        text += f" ({used}/{size})"
-    elif used:
-        text += f" ({used})"
-    return text
+    return f"{CONTEXT_GLYPH} {UNKNOWN if percent is None else f'{percent}%'}"
 
 
 def _session_cache(record: SessionRecord, now: datetime) -> str:

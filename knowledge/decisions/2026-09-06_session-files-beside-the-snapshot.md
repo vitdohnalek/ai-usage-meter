@@ -6,7 +6,8 @@ the snapshot: session id, name (the session's own name, else the project
 directory's basename), model, context percentage and tokens, prompt-cache
 warmth and expiry, and `updated_at`. The tray lists the files updated
 within the last three minutes as inert dropdown rows
-(`cartagenum  ⛁ 61% (610k/1M) · cache 12m`) under a `Sessions (n)`
+(`cartagenum  ⛁ 61% · cache 12m`; the token count stays in the
+terminal line) under a `Sessions (n)`
 header, hides the section when there are none, and deletes files older
 than a day. The snapshot contract is untouched.
 

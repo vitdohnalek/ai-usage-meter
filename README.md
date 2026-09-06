@@ -44,7 +44,7 @@ itself for the per-model window, and the tray reads that file.
    "Show numbers in top bar" check item, and Quit. Windows that have reset
    show 0 percent until the next update. Below the meters, a "Sessions (n)"
    section lists every Claude Code session whose status line rendered in
-   the last three minutes: `cartagenum  ⛁ 61% (610k/1M) · cache 12m`, the
+   the last three minutes: `cartagenum  ⛁ 61% · cache 12m`, the
    session's name (or its directory), its context window, and how long
    its prompt cache stays warm. The countdown runs on the tray's clock. The
    hook writes one small file per session under
