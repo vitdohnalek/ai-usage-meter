@@ -9,7 +9,7 @@
    installs only the hook (WSL, no GNOME).
 3. Paste the printed `statusLine` object into `~/.claude/settings.json`
    by hand. The installer never edits that file by
-   [decision](../../decisions/2026-09-05_hook-is-a-swift-target.md).
+   [decision](../../decisions/upstream/2026-09-05_hook-is-a-swift-target.md).
 4. Send one prompt in any Claude Code session. Every running session picks
    the new statusline up immediately and the snapshot appears within the
    same second; the tray updates on its next 30-second tick.

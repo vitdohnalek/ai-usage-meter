@@ -1,4 +1,4 @@
-"""The on-disk document, byte-compatible with upstream's Swift encoder."""
+"""The on-disk document, byte-compatible with the upstream snapshot format."""
 import json
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
@@ -121,7 +121,7 @@ def _provider_from_json(raw) -> ProviderUsage:
 
 
 def encode(snapshot: Snapshot) -> bytes:
-    """Pretty-printed, sorted keys, ISO-8601 dates, like the Swift encoder."""
+    """Pretty-printed, sorted keys, ISO-8601 dates, as the upstream format specifies."""
     document = {
         "schema_version": snapshot.schema_version,
         "providers": {key: _provider_to_json(usage) for key, usage in snapshot.providers.items()},

@@ -63,3 +63,9 @@
 - source: docs/2026-09-06_statusline-probe-3.md (S4); bundle read of Claude Code 2.1.263; three live get_usage probes
 - pages touched: decisions/2026-09-06_fable-window-via-get-usage.md (new), decisions/2026-09-05_data-source-statusline-snapshot.md (amended), synthesis/gaps_and_leads.md (lead closed, one added), entities/runbooks/install_and_wire.md, sources/source_registry.md (S4), index.md (Now block, catalog)
 - notes: snapshot gains optional seven_day_model {used_percentage, resets_at, model}; tray probes every 5 min off the GTK thread; hook unchanged; 108 tests
+
+## [2026-09-06] lint | fork cleanup of upstream wording
+- contradictions: none
+- stale claims: README, CLAUDE.md, code docstrings and the GitHub description still called the project a macOS tool; fixed to describe the Linux port, with a credits section for upstream
+- orphan pages: none; four upstream-only decision pages (Swift host, Swift hook target, SVG glyph string, PR-1 audit) moved to decisions/upstream/ with a banner; the upstream Swift implementation plan under docs/superpowers/plans/ removed
+- missing cross-refs: links to the moved pages updated in index, decisions, runbook

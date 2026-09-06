@@ -48,7 +48,7 @@ signal read as an unfilled icon rather than a state.
 - Per-model 7-day rows: impossible, only the undocumented endpoint has them.
 
 Related: [snapshot contract](2026-09-05_snapshot-contract.md),
-[host decision](2026-09-05_host-native-swift-menubarextra.md)
+[host decision](upstream/2026-09-05_host-native-swift-menubarextra.md)
 
 ## History
 - 2026-09-05: thresholds 70/90 with outline-to-filled glyph superseded the

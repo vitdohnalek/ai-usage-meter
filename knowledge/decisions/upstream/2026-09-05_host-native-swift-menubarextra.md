@@ -1,5 +1,9 @@
 # Decision: native Swift menu-bar app built with SwiftPM
 
+> Inherited from the upstream project this port started from. It describes
+> the original implementation, not this repository; kept for the reasoning
+> behind the shared contracts. See [the port decision](../2026-09-06_linux-port-python-appindicator.md).
+
 ## What was decided
 The menu-bar item is a native SwiftUI `MenuBarExtra` app built with
 SwiftPM (no Xcode project), bundled by a small script, installed to
@@ -25,6 +29,6 @@ but not for `xcodebuild`, so the build must stay Xcode-free.
 - Python rumps app: adds pyobjc and a LaunchAgent plist for no gain.
 - Hammerspoon: needs Accessibility permission and a Lua runtime.
 
-Related: [data-source decision](2026-09-05_data-source-statusline-snapshot.md)
+Related: [data-source decision](../2026-09-05_data-source-statusline-snapshot.md)
 
 **Last updated**: 2026-09-05

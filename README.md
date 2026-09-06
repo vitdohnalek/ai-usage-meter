@@ -1,9 +1,7 @@
 # ai-usage-meter (Linux)
 
 A tray meter for Claude Code's 5-hour, 7-day, and per-model weekly
-(Fable) rate-limit utilization on Ubuntu / GNOME, forked from
-[DanielZucha/ai-usage-meter](https://github.com/DanielZucha/ai-usage-meter)
-(the macOS original). It never touches a credential: Claude Code's own
+(Fable) rate-limit utilization on Ubuntu / GNOME. It never touches a credential: Claude Code's own
 statusline hook writes a small snapshot file, the tray asks Claude Code
 itself for the per-model window, and the tray reads that file.
 
@@ -33,8 +31,9 @@ itself for the per-model window, and the tray reads that file.
    window, a ten-cell bar, the countdown to reset, the snapshot age, and
    Quit. Windows that have reset show 0 percent until the next update.
 
-The snapshot format is a superset of the macOS original: the extra
-`seven_day_model` key is ignored by readers that do not know it.
+The snapshot format is provider-keyed JSON; the optional `seven_day_model`
+key is ignored by readers that do not know it, so other readers of the file
+stay compatible.
 
 Environment knobs for the tray: `AI_USAGE_METER_CLAUDE` (path to the
 `claude` binary when it is not on PATH) and `AI_USAGE_METER_MODEL` (pick a
@@ -84,3 +83,9 @@ That Windows tray is not built yet.
     tests/                 unittest suite: make test
     packaging/             autostart .desktop template
     knowledge/             project wiki: decisions, runbooks, log
+
+## Credits
+
+Started as a Linux port of
+[DanielZucha/ai-usage-meter](https://github.com/DanielZucha/ai-usage-meter);
+the snapshot format and the display rules come from there.

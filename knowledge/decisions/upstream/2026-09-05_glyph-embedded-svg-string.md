@@ -1,5 +1,9 @@
 # Decision: the glyph ships as an SVG string constant, not a resource
 
+> Inherited from the upstream project this port started from. It describes
+> the original implementation, not this repository; kept for the reasoning
+> behind the shared contracts. See [the port decision](../2026-09-06_linux-port-python-appindicator.md).
+
 ## What was decided
 `assets/claude.svg` is embedded verbatim as the string constant
 `ClaudeGlyph.svg` in MeterCore; a test keeps the constant byte-identical to
@@ -17,7 +21,7 @@ no runtime lookup. macOS 11 and later render SVG data in `NSImage`.
 ## Evidence
 - Host decision: SwiftPM only, no Xcode. [host decision](2026-09-05_host-native-swift-menubarextra.md)
 - Display decision: always filled, drawn into the label image (template
-  normally, opaque when flipped). [display rules](2026-09-05_app-refresh-and-display-rules.md)
+  normally, opaque when flipped). [display rules](../2026-09-05_app-refresh-and-display-rules.md)
 - Measured 2026-09-05 via the AppKit ObjC bridge: `NSImage(data:)` on the
   asset returns an `_NSSVGImageRep`; filled and stroke-width-1 outline
   both rasterize at 32 and 128 px. The `1em` size attributes are harmless
@@ -31,7 +35,7 @@ no runtime lookup. macOS 11 and later render SVG data in `NSImage`.
 - Two PNG sets at 1x and 2x: rejected, a raster loses the template
   crispness at fractional scales and doubles the asset count.
 
-Related: [display rules](2026-09-05_app-refresh-and-display-rules.md)
+Related: [display rules](../2026-09-05_app-refresh-and-display-rules.md)
 
 ## History
 - 2026-09-05: the outline variant (`outlineSVG`, `svg(filled:)`) was removed

@@ -6,8 +6,8 @@
 
 ## Project goal
 
-A personal Linux tray meter for AI-subscription usage, forked from
-DanielZucha/ai-usage-meter (macOS), that never handles a credential. It
+A personal Linux tray meter for AI-subscription usage that never handles a
+credential (started as a port of DanielZucha/ai-usage-meter). It
 renders Claude Code's 5-hour, 7-day, and per-model weekly (Fable)
 rate-limit utilization on Ubuntu / GNOME; the hook alone runs anywhere with
 Python 3, including WSL. Done means: the glyph and three numbers sit in the
@@ -33,8 +33,9 @@ additive; the hook never blocks or writes stderr.
   ship with `make install` (copies to `~/.local`, no pip, no venv).
 - Language: Python 3 on the system interpreter; the tray needs the
   system PyGObject + AppIndicator3 typelibs, which pip cannot provide.
-- Decisions: `knowledge/decisions/` (one page per non-obvious choice; the
-  2026-09-06 pages supersede the macOS host decisions).
+- Decisions: `knowledge/decisions/` (one page per non-obvious choice);
+  `knowledge/decisions/upstream/` holds the inherited pages that no longer
+  apply to this port, kept for the reasoning behind the shared contracts.
 - Design spec for the port: `docs/superpowers/specs/2026-09-06-linux-port-design.md`.
 - Install and wiring steps: `knowledge/entities/runbooks/install_and_wire.md`.
 

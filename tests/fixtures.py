@@ -1,4 +1,4 @@
-"""Shared fixtures, ported from Tests/MeterCoreTests/Fixtures.swift."""
+"""Shared fixtures: real statusline and get_usage payloads, trimmed."""
 from datetime import datetime, timezone
 
 FIVE_RESET = datetime.fromtimestamp(1_788_617_400, tz=timezone.utc)

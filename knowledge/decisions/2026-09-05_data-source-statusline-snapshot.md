@@ -42,7 +42,7 @@ percentage and appears at the next turn.
   once Daniel confirmed Claude Code is nearly all of his usage.
 - Transcript parsing (ccusage style): cannot report quota at all. Rejected.
 
-Related: [host decision](2026-09-05_host-native-swift-menubarextra.md),
+Related: [host decision](upstream/2026-09-05_host-native-swift-menubarextra.md),
 [gaps](../synthesis/gaps_and_leads.md)
 
 **Last updated**: 2026-09-06

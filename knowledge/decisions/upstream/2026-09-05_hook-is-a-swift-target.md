@@ -1,5 +1,9 @@
 # Decision: the statusline hook is a second executable target in the package
 
+> Inherited from the upstream project this port started from. It describes
+> the original implementation, not this repository; kept for the reasoning
+> behind the shared contracts. See [the port decision](../2026-09-06_linux-port-python-appindicator.md).
+
 ## What was decided
 The SwiftPM package has three targets: a library with the snapshot model,
 parsing, formatting, and threshold rules; the menu-bar app; and a hook
@@ -26,7 +30,7 @@ turn inside Claude Code's render loop.
 - bash plus jq: fragile quoting, jq lives in an Anaconda prefix that may
   not be on PATH in the render loop.
 
-Related: [snapshot contract](2026-09-05_snapshot-contract.md)
+Related: [snapshot contract](../2026-09-05_snapshot-contract.md)
 
 ## History
 - 2026-09-05: added the optional effort word (`payload.effort.level`)

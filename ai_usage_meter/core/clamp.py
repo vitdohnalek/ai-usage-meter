@@ -1,4 +1,4 @@
-"""Double-to-int without surprises, one-to-one with MeterCore/Clamp.swift."""
+"""Double-to-int without surprises: round half away from zero, clamp, None for non-numbers."""
 import math
 from typing import Optional
 

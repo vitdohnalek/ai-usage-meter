@@ -39,6 +39,6 @@ window and legitimately restarts from a low number.
   from a stale one.
 
 Related: [snapshot contract](2026-09-05_snapshot-contract.md),
-[hook target](2026-09-05_hook-is-a-swift-target.md)
+[hook target](upstream/2026-09-05_hook-is-a-swift-target.md)
 
 **Last updated**: 2026-09-05

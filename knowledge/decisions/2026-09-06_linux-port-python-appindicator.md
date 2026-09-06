@@ -36,9 +36,9 @@ rehost of behaviour, not a redesign.
   typelibs, which pip cannot install; Ubuntu's externally-managed marker
   makes pip machine-dependent. The Makefile copies files instead.
 
-Supersedes: [host-native-swift-menubarextra](2026-09-05_host-native-swift-menubarextra.md),
-the implementation half of [hook-is-a-swift-target](2026-09-05_hook-is-a-swift-target.md)
-(the contract half stands), and [glyph-embedded-svg-string](2026-09-05_glyph-embedded-svg-string.md)
+Supersedes: [host-native-swift-menubarextra](upstream/2026-09-05_host-native-swift-menubarextra.md),
+the implementation half of [hook-is-a-swift-target](upstream/2026-09-05_hook-is-a-swift-target.md)
+(the contract half stands), and [glyph-embedded-svg-string](upstream/2026-09-05_glyph-embedded-svg-string.md)
 (icons are now SVG files in `ai_usage_meter/assets`).
 
 **Last updated**: 2026-09-06
