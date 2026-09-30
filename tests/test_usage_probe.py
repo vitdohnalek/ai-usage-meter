@@ -5,9 +5,12 @@ import unittest
 from pathlib import Path
 
 from ai_usage_meter.core import usage_probe
-from ai_usage_meter.core.snapshot import ModelWindow
+from ai_usage_meter.core.hook_runner import run as run_hook
+from ai_usage_meter.core.snapshot import ModelWindow, UsageWindow
+from ai_usage_meter.core.store import SnapshotStore
 from tests.fixtures import (
-    CAPTURED, MODEL_RESET, USAGE_ERROR_JSONL, USAGE_NO_MODEL_JSONL, USAGE_RESPONSE_JSONL,
+    CAPTURED, FIVE_RESET, MODEL_RESET, SAMPLE_PAYLOAD_JSON, USAGE_ERROR_JSONL, USAGE_NO_MODEL_JSONL,
+    USAGE_RESPONSE_JSONL,
 )
 
 FAKE_CLAUDE = """#!/usr/bin/env python3
@@ -98,3 +101,21 @@ class CaptureTests(unittest.TestCase):
     def test_find_claude_prefers_the_env_override_then_path(self):
         self.assertEqual(usage_probe.find_claude({usage_probe.BINARY_ENV: "/x/claude"}), "/x/claude")
         self.assertEqual(usage_probe.find_claude({"PATH": self.tmp.name}), str(self.script))
+
+    def test_refresh_merges_the_model_window_into_the_snapshot(self):
+        store = SnapshotStore(self.cwd / "snapshot.json")
+        run_hook(SAMPLE_PAYLOAD_JSON, store, CAPTURED)
+        self.assertTrue(usage_probe.refresh(store, claude=str(self.script), now=CAPTURED, environ=self.env))
+        usage = store.read().claude
+        self.assertEqual(usage.seven_day_model, ModelWindow(5, MODEL_RESET.replace(microsecond=0), "Fable"))
+        self.assertEqual(usage.five_hour, UsageWindow(21, FIVE_RESET))
+        self.assertEqual(usage.source, usage_probe.SOURCE)
+        self.assertEqual(Path(self.cwd_out.read_text()).resolve(), self.cwd.resolve())
+
+    def test_refresh_without_an_answer_leaves_the_snapshot_alone(self):
+        store = SnapshotStore(self.cwd / "snapshot.json")
+        run_hook(SAMPLE_PAYLOAD_JSON, store, CAPTURED)
+        before = store.read()
+        self.output.write_bytes(USAGE_ERROR_JSONL)
+        self.assertFalse(usage_probe.refresh(store, claude=str(self.script), now=CAPTURED, environ=self.env))
+        self.assertEqual(store.read(), before)

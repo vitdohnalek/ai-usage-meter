@@ -99,3 +99,8 @@
 - source: user report (closed sessions still listed); /proc inspection of the hook's parent chain
 - pages touched: decisions/2026-09-06_session-files-beside-the-snapshot.md (amended), entities/runbooks/install_and_wire.md
 - notes: sessions.find_owner walks /proc up to the `claude` comm; record carries owner_pid/owner_start; live() checks the process, 180 s age only as fallback; prune drops gone processes; 140 tests
+
+## [2026-09-30] ingest | Hook starts the usage probe where no tray runs
+- source: user report (no Fable segment in WSL); live snapshot on the WSL host lacked seven_day_model while a hand-run usage_probe.capture returned it in 2.3 s
+- pages touched: decisions/2026-09-30_hook-starts-the-probe-detached.md (new), decisions/2026-09-06_fable-window-via-get-usage.md (amended), decisions/2026-09-06_terminal-line-segments.md (amended), entities/runbooks/install_and_wire.md (step 6, check), synthesis/gaps_and_leads.md (lead amended, one added), index.md (Now block, catalog)
+- notes: core/probe_gate.py (probe.stamp, non-blocking flock, 360 s for the hook); hook.py spawns probe.py in its own session; usage_probe.refresh; tray stamps each probe start; AI_USAGE_METER_NO_PROBE opts out; installed with make install-hook on the WSL host and the running session's statusline wrote seven_day_model within a minute; 157 tests

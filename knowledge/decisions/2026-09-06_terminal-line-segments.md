@@ -8,10 +8,12 @@ already there:
 
 - `5h <n>%` and `wk <n>%`, the same two rate-limit windows the tray shows,
   each present only when the payload carries it.
-- `Fable <n>%`, the per-model week, read from the snapshot the tray's
-  probe maintains (`seven_day_model`), never fetched by the hook itself;
-  0 once its reset has passed, as the tray shows it; absent where no tray
-  runs (WSL, servers).
+- `Fable <n>%`, the per-model week, read from the snapshot a probe
+  maintains (`seven_day_model`), never fetched inline by the hook; 0 once
+  its reset has passed, as the tray shows it. Where no tray runs (WSL,
+  servers) the hook starts the probe detached
+  ([decision](2026-09-30_hook-starts-the-probe-detached.md)), so the
+  segment appears a render or two after the first one.
 - `cache <countdown>` from `prompt_cache.expires_at` while
   `prompt_cache.warm` is true; `cache warm` when the expiry is unknown;
   `cache cold` otherwise; nothing when `caching_observed` is false or the
@@ -49,6 +51,7 @@ emphasis a one-line status bar has.
   120 ms each; the countdown itself has minute resolution).
 
 Related: [tray label](2026-09-06_tray-label-marker-and-icon-swap.md),
-[data source](2026-09-05_data-source-statusline-snapshot.md)
+[data source](2026-09-05_data-source-statusline-snapshot.md),
+[detached probe](2026-09-30_hook-starts-the-probe-detached.md)
 
-**Last updated**: 2026-09-06
+**Last updated**: 2026-09-30

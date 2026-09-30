@@ -2,8 +2,9 @@
 
 A tray meter for Claude Code's 5-hour, 7-day, and per-model weekly
 (Fable) rate-limit utilization on Ubuntu / GNOME. It never touches a credential: Claude Code's own
-statusline hook writes a small snapshot file, the tray asks Claude Code
-itself for the per-model window, and the tray reads that file.
+statusline hook writes a small snapshot file, the tray (or, where none
+runs, the hook) asks Claude Code itself for the per-model window, and the
+tray reads that file.
 
 ## How it works
 
@@ -20,8 +21,8 @@ itself for the per-model window, and the tray reads that file.
    count turns red once the conversation passes the 200k long-context
    boundary. `5h` and `wk` are the 5-hour and 7-day limits (yellow at 75,
    red at 90, the tray's thresholds), useful where there is no tray. The
-   per-model week (`Fable 5%`) follows once the tray's probe has written it
-   to the snapshot, so it is absent on hook-only installs such as WSL. `cache`
+   per-model week (`Fable 5%`) follows once a probe (step 3) has written it
+   to the snapshot, a render or two after the first one. `cache`
    is the prompt cache: a countdown while the cached prefix is warm, `cache
    cold` when the next turn re-bills the whole context. The settings
    snippet the installer prints includes `"refreshInterval": 60`, so the
@@ -34,7 +35,9 @@ itself for the per-model window, and the tray reads that file.
    and the tray merges it into the same snapshot as `seven_day_model`.
    Claude Code talks to Anthropic with its own credential; the tray never
    sees one. The call takes about 1.3 s, runs no hooks, and leaves no
-   transcript.
+   transcript. Where no tray runs (WSL, servers) the hook starts the same
+   probe itself, detached, whenever none has started for 6 minutes; it
+   never waits for the answer, so the line still prints in about 60 ms.
 4. The tray app re-reads the snapshot every 30 seconds and shows the Claude
    glyph with `21% · 4% · 5%` (5-hour, 7-day, Fable week; the third number
    appears once the first probe has answered). A number at 75 percent or
@@ -60,10 +63,11 @@ The snapshot format is provider-keyed JSON; the optional `seven_day_model`
 key is ignored by readers that do not know it, so other readers of the file
 stay compatible. Session files live beside it and never touch the snapshot.
 
-Environment knobs for the tray: `AI_USAGE_METER_CLAUDE` (path to the
-`claude` binary when it is not on PATH) and `AI_USAGE_METER_MODEL` (pick a
-bucket by its display name when the account has several; default is the
-first one).
+Environment knobs for the probe, read by the tray and by the hook:
+`AI_USAGE_METER_CLAUDE` (path to the `claude` binary when it is not on
+PATH) and `AI_USAGE_METER_MODEL` (pick a bucket by its display name when
+the account has several; default is the first one). For the hook alone:
+`AI_USAGE_METER_NO_PROBE=1` stops it from starting probes.
 
 ## Requirements
 
@@ -94,7 +98,8 @@ installer never edits that file.
 ## WSL
 
 Inside WSL run `make install-hook`: the terminal line and the snapshot work
-unchanged. There is no Linux tray in WSL; the snapshot stays on the Linux
+unchanged, and the hook keeps the per-model week fresh by itself (step 3
+above). There is no Linux tray in WSL; the snapshot stays on the Linux
 filesystem so a future Windows-side tray can read it at
 `\\wsl$\<distro>\home\<user>\.local\state\ai-usage-meter\snapshot.json`.
 That Windows tray is not built yet.
@@ -103,6 +108,7 @@ That Windows tray is not built yet.
 
     ai_usage_meter/core    schema, parsing, merge, storage, formatting (tested)
     ai_usage_meter/hook.py the statusline entrypoint
+    ai_usage_meter/probe.py one usage probe, started detached by the hook
     ai_usage_meter/tray    label rules (tested) and the AppIndicator shell
     ai_usage_meter/assets  tray icons
     tests/                 unittest suite: make test

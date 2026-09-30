@@ -27,6 +27,9 @@ additive; the hook never blocks or writes stderr.
   app, polling every 30 s. Second writer: every 5 min the tray asks a
   throwaway `claude -p` for the `get_usage` control request and merges the
   per-model window (`core/usage_probe.py`); both writers share the flock.
+  Without a tray the hook starts that probe itself as a detached
+  `probe.py`, at most once per 6 min across all sessions
+  (`core/probe_gate.py`, a stamp file the tray also writes).
   Sessions: the hook also writes `sessions/<id>.json` beside the snapshot
   (`core/sessions.py`, one writer per file, no lock) with the pid and
   start time of the `claude` process found up the parent chain; the tray

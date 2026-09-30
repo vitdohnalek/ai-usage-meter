@@ -19,14 +19,20 @@
    5 minutes. If the third number never appears, check that `claude` is on
    the tray's PATH or set `AI_USAGE_METER_CLAUDE=/path/to/claude` in the
    autostart environment.
+6. Hook-only installs (WSL): the first render with rate limits starts a
+   detached probe and writes `probe.stamp` beside the snapshot; the Fable
+   segment shows from the next render (at most a minute later with
+   `refreshInterval` 60) and is re-asked once 6 minutes have passed.
+   `AI_USAGE_METER_NO_PROBE=1` in Claude Code's environment turns that
+   off.
 
 ## Checks
 - `cat ~/.local/state/ai-usage-meter/snapshot.json` shows
   `providers.claude` with three windows and ISO-8601 dates; `source` is
   `statusline` or `usage` depending on the last writer.
 - The terminal status bar shows `<model> · <effort> · ⛁ <n>% (<tokens>) ·
-  5h <n>% · wk <n>%` (plus `Fable <n>%` once the tray's probe has written
-  the snapshot, and `cache <countdown>` once a turn has run); the tray
+  5h <n>% · wk <n>%` (plus `Fable <n>%` once a probe has written the
+  snapshot, and `cache <countdown>` once a turn has run); the tray
   follows within 30 seconds.
 - `pgrep -af ai-usage-meter-tray` shows one process; the autostart file
   exists.
@@ -44,6 +50,11 @@
 - One-off probe by hand:
   `python3 -c 'from ai_usage_meter.core import usage_probe; print(usage_probe.capture("/tmp/x"))'`
   from the repo root prints a `ProviderUsage` with `seven_day_model` set.
+- Without a tray, `cat ~/.local/state/ai-usage-meter/probe.stamp` shows the
+  start of the last probe, never older than about 7 minutes while a
+  session is open. A fresh stamp with no `seven_day_model` in the snapshot
+  means the probe ran and got nothing: run the one-off probe above with
+  the PATH Claude Code sees.
 
 ## Undo
 - `make uninstall`, then remove the `statusLine` entry from settings.json.
@@ -69,4 +80,4 @@
 
 Related: [snapshot path](../../decisions/2026-09-06_snapshot-in-xdg-state-home.md)
 
-**Last updated**: 2026-09-06
+**Last updated**: 2026-09-30

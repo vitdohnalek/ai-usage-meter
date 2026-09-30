@@ -4,10 +4,12 @@ import os
 import subprocess
 import sys
 import tempfile
+import time
 import unittest
 from pathlib import Path
 
-from tests.fixtures import SAMPLE_PAYLOAD_JSON
+from tests.fixtures import SAMPLE_PAYLOAD_JSON, USAGE_RESPONSE_JSONL
+from tests.test_usage_probe import FAKE_CLAUDE
 
 REPO = Path(__file__).resolve().parent.parent
 HOOK = REPO / "ai_usage_meter" / "hook.py"
@@ -17,7 +19,8 @@ class HookCliTests(unittest.TestCase):
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory(prefix="ai-usage-meter-cli-")
         self.addCleanup(self.tmp.cleanup)
-        self.env = {**os.environ, "XDG_STATE_HOME": self.tmp.name, "PYTHONPATH": str(REPO), "NO_COLOR": "1"}
+        self.env = {**os.environ, "XDG_STATE_HOME": self.tmp.name, "PYTHONPATH": str(REPO), "NO_COLOR": "1",
+                    "AI_USAGE_METER_NO_PROBE": "1"}
 
     def run_hook(self, stdin: bytes):
         return subprocess.run([sys.executable, str(HOOK)], input=stdin, env=self.env,
@@ -55,3 +58,38 @@ class HookCliTests(unittest.TestCase):
         path = Path(self.tmp.name) / "ai-usage-meter" / "snapshot.json"
         document = json.loads(path.read_text())
         self.assertEqual(document["providers"]["claude"]["five_hour"]["used_percentage"], 21)
+
+    def test_no_probe_env_keeps_the_hook_from_spawning_one(self):
+        self.run_hook(SAMPLE_PAYLOAD_JSON)
+        self.assertFalse((Path(self.tmp.name) / "ai-usage-meter" / "probe.stamp").exists())
+
+    def test_hook_spawns_a_probe_that_adds_the_model_week(self):
+        """No tray anywhere: the hook's detached probe is the only writer of
+        ``seven_day_model``, and the next render shows it."""
+        root = Path(self.tmp.name)
+        claude = root / "claude"
+        claude.write_text(FAKE_CLAUDE)
+        claude.chmod(0o755)
+        (root / "output.jsonl").write_bytes(USAGE_RESPONSE_JSONL)
+        del self.env["AI_USAGE_METER_NO_PROBE"]
+        self.env.update({"AI_USAGE_METER_CLAUDE": str(claude), "CLAUDECODE": "1", "SLEEP": "3",
+                         "PYTHONDEVMODE": "1",  # surfaces ResourceWarning on stderr
+                         "FAKE_OUTPUT": str(root / "output.jsonl"), "FAKE_CWD_OUT": str(root / "cwd.txt")})
+        started = time.monotonic()
+        first = self.run_hook(SAMPLE_PAYLOAD_JSON)
+        self.assertLess(time.monotonic() - started, 2.5, "the hook waited for the probe")
+        self.assertEqual(first.stderr, b"")
+        self.assertEqual(first.stdout.decode("utf-8"), "Fable 5.1 · high · ⛁ 12% (119k/1M) · 5h 21% · wk 4%\n")
+        path = root / "ai-usage-meter" / "snapshot.json"
+        deadline = time.monotonic() + 10
+        while time.monotonic() < deadline:
+            if "seven_day_model" in json.loads(path.read_text())["providers"]["claude"]:
+                break
+            time.sleep(0.05)
+        document = json.loads(path.read_text())
+        self.assertEqual(document["providers"]["claude"]["seven_day_model"]["model"], "Fable")
+        self.assertEqual(document["providers"]["claude"]["five_hour"]["used_percentage"], 21)
+        second = self.run_hook(SAMPLE_PAYLOAD_JSON)
+        self.assertEqual(second.stderr, b"")
+        self.assertTrue(second.stdout.decode("utf-8").startswith(
+            "Fable 5.1 · high · ⛁ 12% (119k/1M) · 5h 21% · wk 4% · Fable "), second.stdout)

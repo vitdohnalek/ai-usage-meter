@@ -3,9 +3,9 @@
 <!-- Generated 2026-09-05 during the founding grill session -->
 
 ## Now
-- Phase: Linux port on main (134 tests, Python + AppIndicator, tagged per merge since v0.2.0): three tray meters (Fable week via a `get_usage` probe), a numbers toggle, a session overview in the dropdown, and a terminal line with limits, Fable week, cache countdown and colour (as of 2026-09-06)
-- Active: first real-world use of the three-number tray; the label vanished from the panel once while the item still exported it (appindicator extension quirk, root cause open); watch whether the toggle repairs it and whether the probe keeps answering (as of 2026-09-06)
-- Next: polish pass (hook cold start ~120 ms, icon rendering check, optional systemd unit, probe interval tuning) (as of 2026-09-06)
+- Phase: Linux port on main (157 tests, Python + AppIndicator, tagged per merge since v0.2.0): three tray meters (Fable week via a `get_usage` probe), a numbers toggle, a session overview in the dropdown, and a terminal line with limits, Fable week, cache countdown and colour; hook-only installs get the Fable week from a probe the hook starts detached (as of 2026-09-30)
+- Active: the hook-started probe is on main and installed on the owner's WSL host (Fable segment confirmed live); first real-world use of the three-number tray; the label vanished from the panel once while the item still exported it (appindicator extension quirk, root cause open) (as of 2026-09-30)
+- Next: the tray-side stamp is untested on a GNOME host, so check there that a running tray keeps the hook from probing; then the polish pass (icon rendering check, optional systemd unit, probe interval tuning) (as of 2026-09-30)
 - Deferred: Windows-side WSL tray reading the snapshot over \wsl$; threshold notifications; Codex as a second provider (as of 2026-09-06)
 - Known: decision pages dated 2026-09-05 were inherited from upstream; the ones that only described its implementation live under decisions/upstream/ (as of 2026-09-06)
 
@@ -24,6 +24,7 @@
 - [gaps_and_leads.md](synthesis/gaps_and_leads.md) -- open questions and leads
 
 ## Decisions
+- [2026-09-30_hook-starts-the-probe-detached.md](decisions/2026-09-30_hook-starts-the-probe-detached.md) -- hook-only installs (WSL): the hook starts the `get_usage` probe detached, gated to one per 6 min by a stamp file the tray also writes; amends the Fable-window decision's "hook is unchanged"
 - [2026-09-06_session-files-beside-the-snapshot.md](decisions/2026-09-06_session-files-beside-the-snapshot.md) -- session overview: the hook writes one file per session, the tray lists those updated within 3 min with context and cache countdown
 - [2026-09-06_terminal-line-segments.md](decisions/2026-09-06_terminal-line-segments.md) -- the terminal line adds the two limits, the per-model week from the snapshot, the prompt-cache countdown and ANSI colour; NO_COLOR honoured in the hook shell
 - [2026-09-06_fable-window-via-get-usage.md](decisions/2026-09-06_fable-window-via-get-usage.md) -- third meter: the tray asks a throwaway `claude -p` for `get_usage` every 5 min and stores `seven_day_model`; amends the data-source decision's out-of-scope clause

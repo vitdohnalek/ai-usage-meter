@@ -18,7 +18,7 @@ gi.require_version("AppIndicator3", "0.1")
 from gi.repository import AppIndicator3, GLib, Gtk  # noqa: E402
 
 from ai_usage_meter.core import display as display_rules  # noqa: E402
-from ai_usage_meter.core import merge, sessions, usage_probe  # noqa: E402
+from ai_usage_meter.core import merge, probe_gate, sessions, usage_probe  # noqa: E402
 from ai_usage_meter.core.snapshot import CLAUDE_PROVIDER_ID  # noqa: E402
 from ai_usage_meter.core.store import SnapshotStore  # noqa: E402
 from ai_usage_meter.tray import label, prefs  # noqa: E402
@@ -148,8 +148,10 @@ class MeterTray(Gtk.Application):
         self.refresh()
 
     def start_probe(self):
-        """Spawn the probe off the GTK thread; skip a tick if one is running."""
+        """Spawn the probe off the GTK thread; skip a tick if one is running.
+        The stamp tells the hook that this tray is doing the asking."""
         if self.probe_thread is None or not self.probe_thread.is_alive():
+            probe_gate.stamp(self.store.path, datetime.now(timezone.utc))
             self.probe_thread = threading.Thread(target=self._probe_worker, daemon=True)
             self.probe_thread.start()
         return True

@@ -2,7 +2,9 @@
 statusline payload; Claude Code exposes it only through its SDK control
 channel. So ask a throwaway ``claude -p`` process for ``get_usage``: Claude
 Code talks to the usage endpoint with its own credentials, and this module
-never sees them. Runs from the tray, never from the hook (about 1.3 s)."""
+never sees them. Takes about 1.3 s, so it runs off the render path: on the
+tray's timer, or in ``probe.py``, which the hook starts detached where no
+tray runs."""
 import json
 import os
 import shutil
@@ -11,8 +13,9 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Mapping, Optional
 
+from . import merge
 from .clamp import clamped_int
-from .snapshot import ModelWindow, ProviderUsage, parse_date
+from .snapshot import CLAUDE_PROVIDER_ID, ModelWindow, ProviderUsage, parse_date
 
 SOURCE = "usage"
 REQUEST_ID = "ai-usage-meter"
@@ -100,3 +103,15 @@ def capture(cwd, claude: Optional[str] = None, model: Optional[str] = None,
     if window is None:
         return None
     return ProviderUsage(None, None, now or datetime.now(timezone.utc), SOURCE, seven_day_model=window)
+
+
+def refresh(store, **capture_arguments) -> bool:
+    """Probe once and merge the answer into ``store`` under its lock; False
+    when the probe gave nothing. ``claude`` runs in the snapshot directory."""
+    incoming = capture(cwd=store.path.parent, **capture_arguments)
+    if incoming is None:
+        return False
+    store.with_exclusive_lock(
+        lambda: store.write(merge.merge_snapshot(store.read(), CLAUDE_PROVIDER_ID, incoming))
+    )
+    return True

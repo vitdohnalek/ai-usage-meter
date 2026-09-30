@@ -3,6 +3,7 @@ import unittest
 from datetime import timedelta
 from pathlib import Path
 
+from ai_usage_meter.core import probe_gate
 from ai_usage_meter.core.hook_runner import run
 from ai_usage_meter.core.snapshot import ModelWindow, ProviderUsage, Snapshot, UsageWindow
 from ai_usage_meter.core.store import SnapshotStore
@@ -91,3 +92,36 @@ class HookRunnerTests(unittest.TestCase):
             run(SAMPLE_PAYLOAD_JSON, self.store, CAPTURED)
         record = sessions.SessionStore.for_snapshot(self.store.path).read_all()[0]
         self.assertEqual((record.owner_pid, record.owner_start), (4242, 99))
+
+    def test_asks_for_a_probe_when_none_ran_lately(self):
+        calls = []
+        run(SAMPLE_PAYLOAD_JSON, self.store, CAPTURED, request_probe=lambda: calls.append(1))
+        self.assertEqual(calls, [1])
+        run(SAMPLE_PAYLOAD_JSON, self.store, CAPTURED + timedelta(seconds=60), request_probe=lambda: calls.append(2))
+        self.assertEqual(calls, [1])
+        later = CAPTURED + timedelta(seconds=probe_gate.HOOK_SECONDS)
+        run(SAMPLE_PAYLOAD_JSON, self.store, later, request_probe=lambda: calls.append(3))
+        self.assertEqual(calls, [1, 3])
+
+    def test_a_probe_stamped_by_the_tray_keeps_the_hook_quiet(self):
+        calls = []
+        probe_gate.stamp(self.store.path, CAPTURED)
+        run(SAMPLE_PAYLOAD_JSON, self.store, CAPTURED + timedelta(seconds=300), request_probe=lambda: calls.append(1))
+        self.assertEqual(calls, [])
+
+    def test_no_probe_without_rate_limits_in_the_payload(self):
+        calls = []
+        run(NO_RATE_LIMITS_JSON, self.store, CAPTURED, request_probe=lambda: calls.append(1))
+        run(b"garbage", self.store, CAPTURED, request_probe=lambda: calls.append(1))
+        self.assertEqual(calls, [])
+        self.assertFalse(probe_gate.stamp_path(self.store.path).exists())
+
+    def test_no_probe_and_no_stamp_unless_a_requester_is_given(self):
+        run(SAMPLE_PAYLOAD_JSON, self.store, CAPTURED)
+        self.assertFalse(probe_gate.stamp_path(self.store.path).exists())
+
+    def test_failing_probe_request_does_not_change_the_line(self):
+        def boom():
+            raise OSError("cannot fork")
+        self.assertEqual(run(SAMPLE_PAYLOAD_JSON, self.store, CAPTURED, request_probe=boom),
+                         "Fable 5.1 · high · ⛁ 12% (119k/1M) · 5h 21% · wk 4%")

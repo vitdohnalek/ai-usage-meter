@@ -8,7 +8,10 @@ request `get_usage` every 5 minutes, takes the first entry of
 `rate_limits.model_scoped` (or the one named by `AI_USAGE_METER_MODEL`),
 and merges it into the snapshot as `providers.claude.seven_day_model`
 with `used_percentage`, `resets_at`, and the server-supplied `model` label.
-The hook is unchanged. The tray label shows it as a third number
+The hook never runs the request inline; where no tray runs it starts the
+same probe detached
+([decision](2026-09-30_hook-starts-the-probe-detached.md)). The tray label
+shows it as a third number
 (`24% · 3% · 5%`), the menu as a third row named after the model.
 
 ## Why
@@ -36,8 +39,9 @@ lifting its "out of scope" clause for the third meter.
 - Call `api/oauth/usage` ourselves with the OAuth token from
   `~/.claude/.credentials.json`: exact and cheap, but reads a credential
   and depends on the undocumented endpoint. Rejected, as before.
-- Run the probe from the hook: 1.3 s inside Claude Code's render loop is
-  unacceptable; the hook must stay under ~150 ms. Rejected.
+- Run the probe inline in the hook: 1.3 s inside Claude Code's render loop
+  is unacceptable; the hook must stay under ~150 ms. Rejected; starting it
+  detached is a different thing and was adopted on 2026-09-30.
 - Keep a long-lived `claude -p` process and re-send the request: saves
   startup time but holds a session open forever. Rejected for the MVP.
 
@@ -53,6 +57,7 @@ lifting its "out of scope" clause for the third meter.
 
 Related: [data-source decision](2026-09-05_data-source-statusline-snapshot.md),
 [label decision](2026-09-06_tray-label-marker-and-icon-swap.md),
+[detached probe](2026-09-30_hook-starts-the-probe-detached.md),
 [gaps](../synthesis/gaps_and_leads.md)
 
-**Last updated**: 2026-09-06
+**Last updated**: 2026-09-30

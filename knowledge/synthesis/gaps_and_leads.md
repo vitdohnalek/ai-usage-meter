@@ -27,10 +27,12 @@
   [decision](../decisions/2026-09-06_fable-window-via-get-usage.md)).
   Remaining lead: if a later Claude Code forwards it into the statusline
   `rate_limits` block, drop the probe and let the hook write it.
-- The probe spawns `claude -p` every 5 minutes (1.3 s each). Trigger: if
-  Anthropic ever rate-limits `get_usage` or the SDK control channel changes
-  shape, the third number silently stops updating and its reset countdown
-  runs out to 0 percent; watch `source` in the snapshot.
+- The probe spawns `claude -p` every 5 minutes from the tray, or every 6
+  or so from the hook where no tray runs (1.3 s each, 2.3 s measured in WSL
+  on 2026-09-30). Trigger: if Anthropic ever rate-limits `get_usage` or the
+  SDK control channel changes shape, the third number silently stops
+  updating and its reset countdown runs out to 0 percent; watch `source` in
+  the snapshot.
 - A `resets_at` unit change upstream (seconds to milliseconds or ISO) would
   render a clamped huge countdown or drop the window silently. Trigger:
   Claude Code changes the unit; then reject values outside now-1d..now+60d.
@@ -40,7 +42,11 @@
   next label change, so a toggle off/on repairs it (runbook trap 5). Trigger
   for a real fix: it recurs at login; then try a one-shot empty-then-set
   label two seconds after activation.
+- A failed hook-started probe is silent by design and is not retried
+  before the 6-minute gate reopens; nothing records why it failed. Trigger:
+  the Fable segment goes missing on a hook-only install; then have
+  `probe.py` leave its last outcome beside the stamp.
 
 Related: [data-source decision](../decisions/2026-09-05_data-source-statusline-snapshot.md)
 
-**Last updated**: 2026-09-06
+**Last updated**: 2026-09-30
