@@ -164,3 +164,12 @@ class OwnerTests(unittest.TestCase):
         store.prune(NOW, proc=self.proc)
         self.assertEqual(sorted(r.session_id for r in store.read_all()),
                          ["running", "running-but-quiet", "unknown-owner-fresh", "unknown-owner-stale"])
+
+
+class ProcReadableTests(unittest.TestCase):
+    def test_readable_means_pid_one_can_be_read(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            proc = Path(tmp) / "proc"
+            self.assertFalse(sessions.proc_readable(proc))
+            fake_proc(proc, 1, "systemd", 0, 1)
+            self.assertTrue(sessions.proc_readable(proc))

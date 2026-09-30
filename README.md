@@ -93,16 +93,41 @@ installer never edits that file.
 
     make install-hook     hook only (WSL, servers, non-GNOME desktops)
     make install-tray     tray only
+    make install-wintray  WSL only: the Windows tray (see below)
     make uninstall        remove everything except the snapshot
 
 ## WSL
 
 Inside WSL run `make install-hook`: the terminal line and the snapshot work
 unchanged, and the hook keeps the per-model week fresh by itself (step 3
-above). There is no Linux tray in WSL; the snapshot stays on the Linux
-filesystem so a future Windows-side tray can read it at
-`\\wsl$\<distro>\home\<user>\.local\state\ai-usage-meter\snapshot.json`.
-That Windows tray is not built yet.
+above). There is no Linux tray in WSL; `make install-wintray` puts one on
+the Windows side instead.
+
+### Windows tray
+
+`make install-wintray` (run inside WSL) copies the package to
+`%LOCALAPPDATA%\ai-usage-meter\app`, installs `pystray` and `Pillow` into
+the Windows Python if they are missing, adds a Startup shortcut and
+launches `pythonw -m ai_usage_meter.wintray.app`. It needs a Windows
+Python reachable as `py -3`. `make uninstall-wintray` removes it again.
+
+The notification area cannot show text beside an icon, so each window gets
+its own icon with the number drawn in, left to right: 5-hour, 7-day,
+per-model week. The stripe under the number is green up to 20 percent,
+blue up to 50, orange up to 75, red up to 90 and purple above. Hovering shows that window's row;
+clicking any of the three opens the same dropdown as on Ubuntu (rows with
+bars and reset countdowns, open sessions, snapshot age). Windows puts new
+icons in the overflow (`^`): drag them onto the taskbar once, or turn
+Python on under Settings > Personalization > Taskbar > Other system tray
+icons.
+
+The tray only reads. It gets the snapshot through
+`\\wsl.localhost\<distro>\home\<user>\.local\state\ai-usage-meter\snapshot.json`
+every 30 seconds, and only while the distro is running, so it never starts
+WSL by itself; while WSL is stopped it shows the last values it saw, marked
+"WSL stopped". The numbers move only while a Claude Code session is open
+in WSL, because the hook is what writes them. Failures go to
+`%LOCALAPPDATA%\ai-usage-meter\wintray.log`.
 
 ## Layout
 
@@ -110,9 +135,11 @@ That Windows tray is not built yet.
     ai_usage_meter/hook.py the statusline entrypoint
     ai_usage_meter/probe.py one usage probe, started detached by the hook
     ai_usage_meter/tray    label rules (tested) and the AppIndicator shell
+    ai_usage_meter/wintray Windows tray for a WSL install: icon and menu rules,
+                           snapshot access over the WSL share (tested), pystray shell
     ai_usage_meter/assets  tray icons
     tests/                 unittest suite: make test
-    packaging/             autostart .desktop template
+    packaging/             autostart .desktop template, Windows tray installer
     knowledge/             project wiki: decisions, runbooks, log
 
 ## Credits

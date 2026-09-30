@@ -46,6 +46,21 @@
   before the 6-minute gate reopens; nothing records why it failed. Trigger:
   the Fable segment goes missing on a hook-only install; then have
   `probe.py` leave its last outcome beside the stamp.
+- Unverified on the Windows tray, because checking means stopping the
+  distro the work ran in: (a) that the 30-second reads through
+  `\\wsl.localhost` do not keep an otherwise idle distro alive, and (b)
+  that a stopped distro really is left alone and the "WSL stopped" copy
+  shows. Check: close every WSL terminal, wait two minutes, run
+  `wsl -l --running` in PowerShell. If the distro never stops, read less
+  often or only while a session file is fresh.
+- Windows tray, still unconfirmed: that a left click opens the dropdown
+  (it rides on pystray's private `_on_notify`), and that the icon order
+  survives a reboot (Windows may remember positions; the order was right
+  on two launches on 2026-09-30).
+- Windows tray: a read that outlasts 15 s falls back to the local copy and
+  the menu then says "WSL stopped" although the share is merely slow; the
+  log has the true cause. Trigger: it shows up in use; then give the
+  reading its own stale reason.
 
 Related: [data-source decision](../decisions/2026-09-05_data-source-statusline-snapshot.md)
 

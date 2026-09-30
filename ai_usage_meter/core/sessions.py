@@ -74,6 +74,13 @@ def find_owner(pid: Optional[int] = None, proc: Path = PROC, names=OWNER_NAMES) 
     return None
 
 
+def proc_readable(proc: Path = PROC) -> bool:
+    """Whether ``proc`` can answer at all (pid 1 always exists). A reader
+    that reaches ``/proc`` through a share must check before it takes a
+    missing process for an exited one."""
+    return _read_stat(1, proc) is not None
+
+
 def owner_alive(pid: int, start: int, proc: Path = PROC) -> bool:
     stat = _read_stat(pid, proc)
     return stat is not None and stat[2] == start

@@ -13,7 +13,7 @@ AUTOSTART  = $(HOME)/.config/autostart/ai-usage-meter.desktop
 TRAY_PATTERN = ^[^ ]*python3 $(TRAY_DEST)$$
 SNAPSHOT   = $${XDG_STATE_HOME:-$(HOME)/.local/state}/ai-usage-meter
 
-.PHONY: test install install-hook install-tray uninstall run snippet check-tray-deps
+.PHONY: test install install-hook install-tray install-wintray uninstall uninstall-wintray run snippet check-tray-deps
 
 test:
 	$(PYTHON) -m unittest discover -s tests -t . $(if $(FILTER),-k $(FILTER),)
@@ -50,6 +50,21 @@ install-tray: check-tray-deps install-package
 	@echo "Tray launched; it also starts at login via $(AUTOSTART)."
 
 install: install-hook install-tray
+
+# WSL only: the tray runs on the Windows side and reads the snapshot through
+# the \\wsl.localhost share. The script copies the package to %LOCALAPPDATA%.
+WINTRAY_SCRIPT = packaging/install-wintray.ps1
+# PowerShell 7 when present: on the owner's host Windows PowerShell 5.1
+# refuses `-File` from WSL with "Invalid argument".
+POWERSHELL     = "$$(command -v pwsh.exe || command -v powershell.exe)" -NoProfile -ExecutionPolicy Bypass
+
+install-wintray:
+	@command -v pwsh.exe >/dev/null 2>&1 || command -v powershell.exe >/dev/null 2>&1 || { echo "No PowerShell found: this target runs inside WSL."; exit 1; }
+	@mkdir -p "$(SNAPSHOT)"
+	$(POWERSHELL) -File "$$(wslpath -w $(WINTRAY_SCRIPT))" -Source "$$(wslpath -w .)" -SnapshotPath "$$(wslpath -w "$(SNAPSHOT)")\snapshot.json"
+
+uninstall-wintray:
+	$(POWERSHELL) -File "$$(wslpath -w $(WINTRAY_SCRIPT))" -Uninstall
 
 snippet:
 	@echo ""

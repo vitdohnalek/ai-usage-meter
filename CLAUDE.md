@@ -10,7 +10,8 @@ A personal Linux tray meter for AI-subscription usage that never handles a
 credential (started as a port of DanielZucha/ai-usage-meter). It
 renders Claude Code's 5-hour, 7-day, and per-model weekly (Fable)
 rate-limit utilization on Ubuntu / GNOME; the hook alone runs anywhere with
-Python 3, including WSL. Done means: the glyph and three numbers sit in the
+Python 3, including WSL, where a Windows-side tray shows the same numbers.
+Done means: the glyph and three numbers sit in the
 tray, update after every Claude Code turn, count down to reset while idle,
 and launch at login.
 
@@ -39,6 +40,11 @@ additive; the hook never blocks or writes stderr.
   `hook.py` and `tray/app.py` are thin shells; `tray/label.py` holds the
   tray's pure label rules. Test with `make test` (unittest, no packages),
   ship with `make install` (copies to `~/.local`, no pip, no venv).
+- Windows tray (`ai_usage_meter/wintray`, WSL hosts only): runs under the
+  Windows Python with pystray + Pillow, reads the snapshot and session
+  files through `\\wsl.localhost\<distro>` and only while that distro is
+  running; never writes the snapshot and never probes. It must import
+  nothing that needs `fcntl` (so not `core/store.py`).
 - Language: Python 3 on the system interpreter; the tray needs the
   system PyGObject + AppIndicator3 typelibs, which pip cannot provide.
 - Decisions: `knowledge/decisions/` (one page per non-obvious choice);

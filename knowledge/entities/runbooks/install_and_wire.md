@@ -26,6 +26,12 @@
    `AI_USAGE_METER_NO_PROBE=1` in Claude Code's environment turns that
    off.
 
+7. WSL with a Windows Python (`py -3`): `make install-wintray` installs
+   the Windows tray (three icons, one per window). It copies the package
+   to `%LOCALAPPDATA%\ai-usage-meter\app`, so rerun it after changing the
+   code. Drag the icons out of the overflow once. `make uninstall-wintray`
+   removes it.
+
 ## Checks
 - `cat ~/.local/state/ai-usage-meter/snapshot.json` shows
   `providers.claude` with three windows and ISO-8601 dates; `source` is
@@ -56,6 +62,12 @@
   means the probe ran and got nothing: run the one-off probe above with
   the PATH Claude Code sees.
 
+- Windows tray: `%LOCALAPPDATA%\ai-usage-meter\wintray.log` holds one
+  `reading \\wsl.localhost\...` line per start and any traceback;
+  `snapshot.json` beside it is the copy shown while WSL is stopped. One
+  `pythonw.exe` with `ai_usage_meter.wintray.app` in its command line
+  should be running.
+
 ## Undo
 - `make uninstall`, then remove the `statusLine` entry from settings.json.
 
@@ -77,6 +89,9 @@
    /org/ayatana/NotificationItem/ai_usage_meter org.kde.StatusNotifierItem
    XAyatanaLabel`). Untick and re-tick "Show numbers in top bar": the empty
    label makes the extension destroy the widget, the next one rebuilds it.
+6. `make install-wintray` uses PowerShell 7 (`pwsh.exe`) when present:
+   on the owner's host Windows PowerShell 5.1 refuses `-File` from WSL with
+   "Invalid argument" even for a one-line script, cause unknown.
 
 Related: [snapshot path](../../decisions/2026-09-06_snapshot-in-xdg-state-home.md)
 
